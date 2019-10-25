@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import networkTreeService from "../services";
+import networkTreeService from "../../services";
 
 export default {
   name: "createNetworkDialog",

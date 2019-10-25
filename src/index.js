@@ -4,7 +4,8 @@ const HEADERBAR = "GraphManagerTopBar";
 import {
   CREATE_NETWORK_BTN,
   CREATE_NETWORK_TREE_CONTEXT_BTN,
-  ADD_BIMOBJECT
+  ADD_BIMOBJECT,
+  VIEW_DETAIL
 } from "./buttons";
 
 import {
@@ -16,5 +17,6 @@ import "./js/register";
 
 spinalContextMenuService.registerApp(SIDEBAR, new CREATE_NETWORK_BTN(), [3]);
 spinalContextMenuService.registerApp(SIDEBAR, new ADD_BIMOBJECT(), [3]);
+spinalContextMenuService.registerApp(SIDEBAR, new VIEW_DETAIL(), [3]);
 spinalContextMenuService.registerApp(HEADERBAR,
   new CREATE_NETWORK_TREE_CONTEXT_BTN(), [3]);

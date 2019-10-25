@@ -4,7 +4,6 @@ import {
 
 import ContextGeographicService from "spinal-env-viewer-context-geographic-service";
 
-
 import networkTreeService from "../services";
 
 
@@ -39,28 +38,31 @@ class AddBimObjects extends SpinalContextApp {
       return;
     }
 
-
-    for (let idx = 0; idx < bimSelected.length; idx++) {
-      const {
-        model,
-        selection
-      } = bimSelected[idx];
+    networkTreeService.addBimObject(option.context.id.get(), option
+      .selectedNode.id.get(), bimSelected);
 
 
-      model.getBulkProperties(selection, {
-        propFilter: ['name']
-      }, (el) => {
+    // for (let idx = 0; idx < bimSelected.length; idx++) {
+    //   const {
+    //     model,
+    //     selection
+    //   } = bimSelected[idx];
 
-        el.forEach(element => {
-          ContextGeographicService.addBimElement(
-            option.context,
-            option.selectedNode,
-            element,
-            model
-          );
-        });
-      });
-    }
+
+    //   model.getBulkProperties(selection, {
+    //     propFilter: ['name']
+    //   }, (el) => {
+
+    //     el.forEach(element => {
+    //       ContextGeographicService.addBimElement(
+    //         option.context,
+    //         option.selectedNode,
+    //         element,
+    //         model
+    //       );
+    //     });
+    //   });
+    // }
 
   }
 
