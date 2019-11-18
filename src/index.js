@@ -14,9 +14,13 @@ import {
 
 import "./js/register";
 
+import spinalNetworkTreeService from "../src/services";
 
 spinalContextMenuService.registerApp(SIDEBAR, new CREATE_NETWORK_BTN(), [3]);
 spinalContextMenuService.registerApp(SIDEBAR, new ADD_BIMOBJECT(), [3]);
 spinalContextMenuService.registerApp(SIDEBAR, new VIEW_DETAIL(), [3]);
 spinalContextMenuService.registerApp(HEADERBAR,
   new CREATE_NETWORK_TREE_CONTEXT_BTN(), [3]);
+
+
+export default spinalNetworkTreeService;
