@@ -52,6 +52,10 @@ const {
 
 import spinalNetworktree from "../../services";
 
+import spinalExcelManager from "spinal-env-viewer-plugin-excel-manager-service";
+
+import FileSaver from "file-saver";
+
 export default {
   name: "networkTreeDetailPanel",
   data() {
@@ -94,8 +98,72 @@ export default {
       return groupsNames.length > 0 ? groupsNames.join(", ") : "-";
     },
 
+    getHeader() {
+      return [
+        {
+          key: "bimFileId",
+          header: "BimFileId",
+          width: 20
+        },
+        {
+          key: "dbid",
+          header: "Dbid",
+          width: 20
+        },
+        {
+          key: "externalId",
+          header: "ExternalId",
+          width: 20
+        },
+        {
+          key: "name",
+          header: "Name",
+          width: 20
+        },
+        {
+          key: "type",
+          header: "Type",
+          width: 20
+        },
+        {
+          key: "parent",
+          header: "Parent(s)",
+          width: 20
+        },
+        {
+          key: "group",
+          header: "Group(s)",
+          width: 20
+        }
+      ];
+    },
+
+    getRows() {
+      return this.data.map(el => {
+        el["group"] = this.formatGroups(el);
+        el["parent"] = this.formatParents(el);
+        return el;
+      });
+    },
+
     exportFile() {
-      console.log("export");
+      let result = [
+        {
+          name: `Network Tree ${this.itemSelected.name}`,
+          author: "spinalcom",
+          data: [
+            {
+              name: `Network Tree ${this.itemSelected.name}`,
+              header: this.getHeader(),
+              rows: this.getRows()
+            }
+          ]
+        }
+      ];
+
+      spinalExcelManager.export(result).then(buffer => {
+        FileSaver.saveAs(new Blob(buffer), `spinalcom.xlsx`);
+      });
     }
   },
   watch: {
