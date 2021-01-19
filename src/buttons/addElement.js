@@ -1,8 +1,11 @@
 import {
-  SpinalContextApp
+  SpinalContextApp,
+  spinalContextMenuService
 } from "spinal-env-viewer-context-menu-service";
 
 import ContextGeographicService from "spinal-env-viewer-context-geographic-service";
+
+const SIDEBAR = "GraphManagerSideBar";
 
 import networkTreeService from "../services";
 
@@ -68,5 +71,9 @@ class AddBimObjects extends SpinalContextApp {
 
 }
 
+const addBimObjectBtn = new AddBimObjects()
 
-export default AddBimObjects;
+spinalContextMenuService.registerApp(SIDEBAR, addBimObjectBtn, [3]);
+
+
+export default addBimObjectBtn;

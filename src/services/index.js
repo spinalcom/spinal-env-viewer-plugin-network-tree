@@ -25,6 +25,7 @@ export default {
       SPINAL_RELATION_PTR_LST_TYPE)
 
   },
+  
   addBimObject(contextId, parentId, bimObjectList) {
     for (let idx = 0; idx < bimObjectList.length; idx++) {
       const {
@@ -59,6 +60,7 @@ export default {
       });
     }
   },
+
   getNetworkTreeBimObjects(contextId) {
     return SpinalGraphService.findNodes(contextId, [constants.NETWORK_RELATION,
       constants.NETWORK_BIMOJECT_RELATION
@@ -66,6 +68,7 @@ export default {
       return node.getType().get() === BIM_OBJECT_TYPE;
     })
   },
+
   getNetworkGroups(bimObjectId) {
     let realNode = SpinalGraphService.getRealNode(bimObjectId);
     if (!realNode) return [];

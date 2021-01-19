@@ -23,74 +23,78 @@ with this file. If not, see
 -->
 
 <template>
-
   <md-dialog :md-active.sync="showDialog"
-             @md-closed="closeDialog(false)">
-    <md-dialog-title>{{title}}</md-dialog-title>
+             @md-closed="closeDialog(false)"
+             class="linkerDialogsContent">
+    <md-dialog-title style="text-align : center">Unlink Profil</md-dialog-title>
     <md-dialog-content>
-      <md-field>
-        <label>{{label}}</label>
-        <md-input v-model="inputValue"></md-input>
-      </md-field>
-
+      <edit-link :data="data"></edit-link>
     </md-dialog-content>
     <md-dialog-actions>
       <md-button class="md-primary"
-                 @click="closeDialog(false)">Close</md-button>
+                 @click="closeDialog(false)">close</md-button>
+
       <md-button class="md-primary"
-                 @click="closeDialog(true)"
-                 :disabled="!(inputValue.trim().length > 0)">Save</md-button>
+                 @click="closeDialog(true)">Save</md-button>
     </md-dialog-actions>
   </md-dialog>
 </template>
 
+
 <script>
-import networkTreeService from "../../services";
+import editLinkContent from "../components/links/editLinks.vue";
 
 export default {
-  name: "createNetworkDialog",
+  name: "editLinksDialog",
   props: ["onFinised"],
+  components: {
+    "edit-link": editLinkContent,
+  },
   data() {
+    this.callback;
+
     return {
       showDialog: true,
-      inputValue: "",
-      title: "",
-      label: "",
-      createContext: "",
-      selectedNode: null,
-      context: null,
+      data: undefined,
     };
   },
   methods: {
     opened(option) {
-      this.title = option.title;
-      this.label = option.label;
-      this.selectedNode = option.selectedNode;
-      this.context = option.context;
-      this.createContext = option.createContext;
+      this.data = JSON.parse(JSON.stringify(option.data));
+      this.callback = option.callback;
     },
-
     removed(option) {
-      if (option.closeResult && option.inputValue.trim().length > 0) {
-        let name = this.inputValue.trim();
-        if (this.createContext) {
-          networkTreeService.createNetworkContext(name);
-        } else {
-          networkTreeService.addNetwork(
-            name,
-            this.selectedNode.id.get(),
-            this.context.id.get()
-          );
-        }
+      if (option) {
+        if (typeof this.callback === "function") this.callback(this.data);
       }
       this.showDialog = false;
     },
-
     closeDialog(closeResult) {
       if (typeof this.onFinised === "function") {
-        this.onFinised({ closeResult, inputValue: this.inputValue });
+        this.onFinised(closeResult);
       }
     },
+
+    // _formatInvalidData(data) {
+    //   console.log("data", data);
+    //   data.invalidAutomateItems = data.invalidAutomateItems.map((el) => {
+    //     el.checked = false;
+    //     return el;
+    //   });
+    //   data.invalidProfileItems = data.invalidProfileItems.map((el) => {
+    //     el.checked = false;
+    //     return el;
+    //   });
+
+    //   return data;
+    // },
   },
 };
 </script>
+
+<style scoped>
+.linkerDialogsContent {
+  width: 100%;
+  height: 100%;
+}
+</style>

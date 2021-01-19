@@ -1,10 +1,15 @@
 import {
-  SpinalContextApp
+  SpinalContextApp,
+  spinalContextMenuService
 } from "spinal-env-viewer-context-menu-service";
 
 const {
-  spinalPanelManagerService
+  spinalPanelManagerService,
+  
 } = require("spinal-env-viewer-panel-manager-service");
+
+const HEADERBAR = "GraphManagerTopBar";
+
 
 class CreateNetWorkContext extends SpinalContextApp {
   constructor() {
@@ -32,4 +37,9 @@ class CreateNetWorkContext extends SpinalContextApp {
 
 }
 
-export default CreateNetWorkContext;
+
+const createNetworkContextBtn = new CreateNetWorkContext()
+
+spinalContextMenuService.registerApp(HEADERBAR, createNetworkContextBtn, [3]);
+
+export default createNetworkContextBtn;

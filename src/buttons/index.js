@@ -1,11 +1,19 @@
-import CREATE_NETWORK_BTN from "./createNetwork";
-import CREATE_NETWORK_TREE_CONTEXT_BTN from "./createNetworkContext";
-import ADD_BIMOBJECT from "./addElement";
-import VIEW_DETAIL from "./tableDetail"
+import createNetworkBtn from "./createNetwork";
+import createNetworkTreeContextBtn from "./createNetworkContext";
+import addBimObjectBtn from "./addElement";
+import viewDetailBtn from "./tableDetail"
+import generateNetworkTreeBtn from "./generateAutomateContext";
+import linkProfilBtn from "./linkProfil";
+import unlinkProfil from "./unlinkProfil";
+import editLinkButton from "./editLinkButton";
 
 export {
-  ADD_BIMOBJECT,
-  CREATE_NETWORK_BTN,
-  CREATE_NETWORK_TREE_CONTEXT_BTN,
-  VIEW_DETAIL
+  addBimObjectBtn,
+  createNetworkBtn,
+  createNetworkTreeContextBtn,
+  viewDetailBtn,
+  generateNetworkTreeBtn,
+  linkProfilBtn,
+  unlinkProfil,
+  editLinkButton
 }

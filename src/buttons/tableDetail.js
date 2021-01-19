@@ -1,10 +1,13 @@
 import {
-  SpinalContextApp
+  SpinalContextApp,
+  spinalContextMenuService
 } from "spinal-env-viewer-context-menu-service";
 
 import {
   spinalPanelManagerService
 } from "spinal-env-viewer-panel-manager-service";
+
+const SIDEBAR = "GraphManagerSideBar";
 
 import networkTreeService from "../services";
 
@@ -36,4 +39,9 @@ class TableDetail extends SpinalContextApp {
 }
 
 
-export default TableDetail;
+const tableDetailBtn = new TableDetail()
+
+spinalContextMenuService.registerApp(SIDEBAR, tableDetailBtn, [3]);
+
+
+export default tableDetailBtn;

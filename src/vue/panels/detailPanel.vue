@@ -1,3 +1,27 @@
+<!--
+Copyright 2020 SpinalCom - www.spinalcom.com
+
+This file is part of SpinalCore.
+
+Please read all of the following terms and conditions
+of the Free Software license Agreement ("Agreement")
+carefully.
+
+This Agreement is a legally binding contract between
+the Licensee (as defined below) and SpinalCom that
+sets forth the terms and conditions that govern your
+use of the Program. By installing and/or using the
+Program, you agree to abide by all the terms and
+conditions stated or referenced herein.
+
+If you do not agree to abide by these terms and
+conditions, do not demonstrate your acceptance and do
+not install or use the Program.
+You should have received a copy of the license along
+with this file. If not, see
+<http://resources.spinalcom.com/licenses.pdf>.
+-->
+
 <template>
   <md-content class="myContainer md-scrollbar">
 
@@ -47,7 +71,7 @@
 
 <script>
 const {
-  spinalPanelManagerService
+  spinalPanelManagerService,
 } = require("spinal-env-viewer-panel-manager-service");
 
 import spinalNetworktree from "../../services";
@@ -61,23 +85,27 @@ export default {
   data() {
     return {
       itemSelected: null,
-      data: []
+      data: [],
     };
   },
   methods: {
     opened(params) {
       this.itemSelected = params;
     },
+
+    closed() {},
+
     setTitle(title) {
       spinalPanelManagerService.panels.networkTreeDetailPanel.panel.setTitle(
         title
       );
     },
+
     getAllData(contextId) {
       return spinalNetworktree
         .getNetworkTreeBimObjects(contextId)
-        .then(bimObjects => {
-          let promises = bimObjects.map(async el => {
+        .then((bimObjects) => {
+          let promises = bimObjects.map(async (el) => {
             let info = el.info.get();
             info["groups"] = await spinalNetworktree.getNetworkGroups(info.id);
             info[
@@ -90,11 +118,11 @@ export default {
         });
     },
     formatParents(item) {
-      let parentsDbIds = item.parents.map(el => el.externalId);
+      let parentsDbIds = item.parents.map((el) => el.externalId);
       return parentsDbIds.length > 0 ? parentsDbIds.join(", ") : "-";
     },
     formatGroups(item) {
-      let groupsNames = item.groups.map(el => el.name);
+      let groupsNames = item.groups.map((el) => el.name);
       return groupsNames.length > 0 ? groupsNames.join(", ") : "-";
     },
 
@@ -103,43 +131,43 @@ export default {
         {
           key: "bimFileId",
           header: "BimFileId",
-          width: 20
+          width: 20,
         },
         {
           key: "dbid",
           header: "Dbid",
-          width: 20
+          width: 20,
         },
         {
           key: "externalId",
           header: "ExternalId",
-          width: 20
+          width: 20,
         },
         {
           key: "name",
           header: "Name",
-          width: 20
+          width: 20,
         },
         {
           key: "type",
           header: "Type",
-          width: 20
+          width: 20,
         },
         {
           key: "parent",
           header: "Parent(s)",
-          width: 20
+          width: 20,
         },
         {
           key: "group",
           header: "Group(s)",
-          width: 20
-        }
+          width: 20,
+        },
       ];
     },
 
     getRows() {
-      return this.data.map(el => {
+      return this.data.map((el) => {
         el["group"] = this.formatGroups(el);
         el["parent"] = this.formatParents(el);
         return el;
@@ -155,26 +183,25 @@ export default {
             {
               name: `Network Tree ${this.itemSelected.name}`,
               header: this.getHeader(),
-              rows: this.getRows()
-            }
-          ]
-        }
+              rows: this.getRows(),
+            },
+          ],
+        },
       ];
 
-      spinalExcelManager.export(result).then(buffer => {
+      spinalExcelManager.export(result).then((buffer) => {
         FileSaver.saveAs(new Blob(buffer), `spinalcom.xlsx`);
       });
-    }
+    },
   },
   watch: {
     itemSelected() {
-      this.getAllData(this.itemSelected.id).then(objects => {
+      this.getAllData(this.itemSelected.id).then((objects) => {
         this.setTitle(`Network Tree : ${this.itemSelected.name}`);
-        console.log("objects", objects);
         this.data = objects;
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

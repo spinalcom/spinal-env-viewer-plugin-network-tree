@@ -1,17 +1,20 @@
 import {
-  SpinalContextApp
+  SpinalContextApp,
+  spinalContextMenuService
 } from "spinal-env-viewer-context-menu-service";
 
 const {
   spinalPanelManagerService
 } = require("spinal-env-viewer-panel-manager-service");
 
+const SIDEBAR = "GraphManagerSideBar";
+
 import networkService from "../services"
 
 class CreateNetWork extends SpinalContextApp {
   constructor() {
-    super("Create Network Tree", "Create Network Tree", {
-      icon: "timeline",
+    super("Create Subnetwork Tree", "Create Network Tree", {
+      icon: "device_hub",
       icon_type: "in",
       backgroundColor: "#FF00000",
       fontColor: "#FFFFFF"
@@ -39,4 +42,7 @@ class CreateNetWork extends SpinalContextApp {
 
 }
 
-export default CreateNetWork;
+const createNetworkBtn = new CreateNetWork()
+spinalContextMenuService.registerApp(SIDEBAR, createNetworkBtn, [3]);
+
+export default createNetworkBtn;
