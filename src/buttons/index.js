@@ -6,6 +6,7 @@ import generateNetworkTreeBtn from "./generateAutomateContext";
 import linkProfilBtn from "./linkProfil";
 import unlinkProfil from "./unlinkProfil";
 import editLinkButton from "./editLinkButton";
+import seeSubItems from "./seeSubItems";
 
 export {
   addBimObjectBtn,
@@ -15,5 +16,6 @@ export {
   generateNetworkTreeBtn,
   linkProfilBtn,
   unlinkProfil,
-  editLinkButton
+  editLinkButton,
+  seeSubItems
 }

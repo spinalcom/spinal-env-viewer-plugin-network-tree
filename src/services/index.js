@@ -25,7 +25,7 @@ export default {
       SPINAL_RELATION_PTR_LST_TYPE)
 
   },
-  
+
   addBimObject(contextId, parentId, bimObjectList) {
     for (let idx = 0; idx < bimObjectList.length; idx++) {
       const {
@@ -47,23 +47,27 @@ export default {
           window.spinal.BimObjectService
             .createBIMObject(element.dbId,
               element.name, model).then(bimObject => {
-              let BimObjectId = bimObject.info ? bimObject.info.id
-                .get() : bimObject.id.get();
+                let BimObjectId = bimObject.info ? bimObject.info.id
+                  .get() : bimObject.id.get();
 
-              SpinalGraphService.addChildInContext(parentId,
-                BimObjectId, contextId, constants
-                .NETWORK_BIMOJECT_RELATION,
-                SPINAL_RELATION_PTR_LST_TYPE)
-            })
+                SpinalGraphService.addChildInContext(parentId,
+                  BimObjectId, contextId, constants
+                  .NETWORK_BIMOJECT_RELATION,
+                  SPINAL_RELATION_PTR_LST_TYPE)
+              })
 
         });
       });
     }
   },
 
+  getBimObjectsLinked(nodeId) {
+    return SpinalGraphService.getChildren(nodeId, [constants.NETWORK_BIMOJECT_RELATION]);
+  },
+
   getNetworkTreeBimObjects(contextId) {
     return SpinalGraphService.findNodes(contextId, [constants.NETWORK_RELATION,
-      constants.NETWORK_BIMOJECT_RELATION
+    constants.NETWORK_BIMOJECT_RELATION
     ], (node) => {
       return node.getType().get() === BIM_OBJECT_TYPE;
     })
@@ -89,7 +93,7 @@ export default {
     if (!realNode) return [];
 
     return realNode.getParents([constants.NETWORK_BIMOJECT_RELATION,
-      constants.NETWORK_RELATION
+    constants.NETWORK_RELATION
     ]).then(argParents => {
 
       let promises = argParents.map(async el => {
