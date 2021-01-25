@@ -13,7 +13,7 @@ import networkService from "../services"
 
 class CreateNetWork extends SpinalContextApp {
   constructor() {
-    super("Create Subnetwork Tree", "Create Network Tree", {
+    super("Create Subnetwork", "Create Subnetwork", {
       icon: "device_hub",
       icon_type: "in",
       backgroundColor: "#FF00000",
