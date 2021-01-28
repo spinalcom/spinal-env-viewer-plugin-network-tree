@@ -34,7 +34,8 @@ with this file. If not, see
                md-description="select automates">
         <md-content class="step-container md-scrollbar">
           <selection-step :items="data.automates"
-                          @clear="clearAutomates"></selection-step>
+                          @clear="clearAutomates" 
+                          @changed="() => this.changed = true"></selection-step>
         </md-content>
 
       </md-step>
@@ -44,7 +45,8 @@ with this file. If not, see
                md-description="select objects to classify">
         <md-content class="step-container md-scrollbar">
           <selection-step :items="data.equipments"
-                          @clear="clearEquipments"></selection-step>
+                          @clear="clearEquipments" 
+                          @changed="() => this.changed = true"></selection-step>
         </md-content>
       </md-step>
 
@@ -54,7 +56,7 @@ with this file. If not, see
                :md-error="errorInConfig">
         <md-content class="step-container md-scrollbar">
           <configuration-step :data="data"
-                              :attribute="data.attribute"></configuration-step>
+                              :attribute="data.attribute" @changed="() => this.changed = true"></configuration-step>
         </md-content>
 
       </md-step>
@@ -68,7 +70,9 @@ with this file. If not, see
                                   :equipments="data.equipments"
                                   :attribute="data.attribute"
                                   :contextId="contextId"
-                                  :selectedNodeId="selectedNodeId">
+                                  :selectedNodeId="selectedNodeId" 
+                                  :changed="changed" 
+                                  @verified="() => this.changed = false">
           </launch-generation-step>
         </md-content>
 
@@ -92,6 +96,7 @@ export default {
   },
   data() {
     return {
+      changed : false,
       active: "first",
       first: false,
       second: false,
@@ -127,10 +132,12 @@ export default {
 
     clearAutomates() {
       this.data.automates = [];
+      this.changed = true;
     },
 
     clearEquipments() {
       this.data.equipments = [];
+      this.changed = true;
     },
 
     errorInFirstStep() {
@@ -139,7 +146,32 @@ export default {
 
     changeStep(step) {},
   },
-  watch: {},
+  computed : {
+    attribute_attributeName() {
+      return this.data.attribute.attributeName;
+    },
+
+    attribute_separator() {
+      return this.data.attribute.separator;
+    },
+
+    attribute_indice() {
+      return this.data.attribute.indice;
+    },
+  },
+  watch: {
+    attribute_attributeName() {
+      this.changed = true
+    },
+
+    attribute_separator() {
+      this.changed = true
+    },
+    
+    attribute_indice() {
+      this.changed = true
+    },
+  },
 };
 </script>
 

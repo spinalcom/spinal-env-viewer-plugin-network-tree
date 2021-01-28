@@ -62,6 +62,7 @@ export default {
     async addSelection() {
       await this.addItemSelected();
       this.changeItemCount();
+      this.$emit("changed");
     },
 
     clearReferential() {

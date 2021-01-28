@@ -23,7 +23,7 @@ with this file. If not, see
 
     <div class="buttons"
          v-if="appState === STATES.normal">
-      <md-button v-if="!verified"
+      <md-button v-if="!verified" :disabled="disableVerificationButton"
                  class="md-raised md-primary"
                  @click="launchVerification">Verify</md-button>
 
@@ -79,6 +79,7 @@ export default {
     error: {},
     contextId: {},
     selectedNodeId: {},
+    changed : {}
   },
   data() {
     this.STATES = {
@@ -106,6 +107,7 @@ export default {
 
         this.verified = true;
         this.appState = this.STATES.normal;
+        this.$emit("verified");
       });
     },
 
@@ -130,10 +132,10 @@ export default {
         .then((result) => {
           this.appState = this.STATES.success;
 
-          setTimeout(() => {
-            this.appState = this.STATES.normal;
-            this.verified = false;
-          }, 1000);
+          // setTimeout(() => {
+          //   this.appState = this.STATES.normal;
+          //   this.verified = false;
+          // }, 1000);
         })
         .catch((err) => {
           console.error(err);
@@ -173,6 +175,22 @@ export default {
       });
     },
   },
+  computed : {
+    disableVerificationButton() {
+      return this.automates.length === 0 || this.equipments.length === 0;
+    }
+  },
+  watch : {
+    changed() {
+      if(this.changed) {
+        this.appState = this.STATES.normal;
+        this.verified = false;
+      }
+    }
+    // attribute() {
+    //   this.verified = false;
+    // }
+  }
 };
 </script>
 
