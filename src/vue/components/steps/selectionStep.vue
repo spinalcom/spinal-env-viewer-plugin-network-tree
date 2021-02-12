@@ -19,136 +19,222 @@ with this file. If not, see
 -->
 
 <template>
-  <div class="sub-content">
+   <div class="sub-content">
 
-    <div class="countdiv">
-      {{count}} item(s) selected
-    </div>
+      <div class="countdiv">
+         {{count}} item(s) selected
+      </div>
 
-    <div class="buttons">
-      <md-button @click="addSelection">
-        <md-icon>add</md-icon>
-        <md-tooltip md-delay="300">Add Bim objects selected</md-tooltip>
-      </md-button>
+      <div class="buttons">
+         <md-button @click="addSelection">
+            <md-icon>add</md-icon>
+            <md-tooltip md-delay="300">Add Bim objects selected</md-tooltip>
+         </md-button>
 
-      <md-button @click="clearReferential">
-        <md-icon>clear</md-icon>
-        <md-tooltip md-delay="300">Clear selected</md-tooltip>
-      </md-button>
+         <md-button @click="clearReferential">
+            <md-icon>clear</md-icon>
+            <md-tooltip md-delay="300">Clear selected</md-tooltip>
+         </md-button>
 
-      <md-button @click="showReferential">
-        <md-icon>visibility</md-icon>
-        <md-tooltip md-delay="300">Show referential</md-tooltip>
-      </md-button>
-    </div>
+         <md-button @click="showReferential">
+            <md-icon>visibility</md-icon>
+            <md-tooltip md-delay="300">Show referential</md-tooltip>
+         </md-button>
+      </div>
 
-  </div>
+      <div>
+         <md-field>
+            <label>Attribute</label>
+            <md-input v-model="config.attributeName"></md-input>
+         </md-field>
+      </div>
+
+      <div>
+         <div v-if="displayResult">
+            <md-button
+               class="md-dense md-primary"
+               @click="selectValidItemsOnModel"
+            >
+               {{validItems.length}} item(s) is/are valid
+            </md-button>
+
+            <md-button
+               class="md-dense md-accent"
+               @click="selectInvalidItemsOnModel"
+            >
+               {{invalidItems.length}} item(s) is/are not valid
+            </md-button>
+         </div>
+
+         <md-button
+            v-if="!loadAttributeResult"
+            :disabled="displayResult"
+            class="md-raised md-primary"
+            @click="verifyResult"
+         >Verify</md-button>
+
+         <md-progress-spinner
+            v-if="loadAttributeResult"
+            :md-diameter="30"
+            :md-stroke="3"
+            md-mode="indeterminate"
+         ></md-progress-spinner>
+      </div>
+
+   </div>
 </template>
 
 <script>
 import geographicService from "spinal-env-viewer-context-geographic-service";
 import { bimObjectManagerService } from "spinal-env-viewer-bim-manager-service";
+import generateAutomateService from "../../../js/generateAutomateService";
 export default {
-  name: "selectionStep",
-  props: {
-    items: {},
-  },
-  data() {
-    return {
-      count: 0,
-    };
-  },
-  methods: {
-    async addSelection() {
-      await this.addItemSelected();
-      this.changeItemCount();
-      this.$emit("changed");
-    },
+   name: "selectionStep",
+   props: {
+      config: {},
+   },
+   data() {
+      return {
+         validItems: [],
+         invalidItems: [],
+         loadAttributeResult: false,
+         displayResult: false,
+         count: 0,
+      };
+   },
+   methods: {
+      async addSelection() {
+         await this.addItemSelected();
+         this.changeItemCount();
+         this.displayResult = false;
+         this.$emit("changed");
+      },
 
-    clearReferential() {
-      // this.items = [];
-      // this.changeItemCount();
+      clearReferential() {
+         this.config.items = [];
+         this.changeItemCount();
+         this.displayResult = false;
+         this.$emit("changed");
 
-      this.$emit("clear");
-    },
+         // this.changeItemCount();
 
-    async addItemSelected() {
-      const aggregateSelection = window.spinal.ForgeViewer.viewer.getAggregateSelection();
+         //  this.$emit("clear");
+      },
 
-      if (aggregateSelection.length === 0) {
-        window.alert("no bim object selected");
-        return;
-      }
+      async addItemSelected() {
+         const aggregateSelection = window.spinal.ForgeViewer.viewer.getAggregateSelection();
 
-      const selection = await this.getLeafDbIds(aggregateSelection);
+         if (aggregateSelection.length === 0) {
+            window.alert("no bim object selected");
+            return;
+         }
 
-      for (const element of selection) {
-        this.addItemToList(element);
-      }
+         const selection = await this.getLeafDbIds(aggregateSelection);
 
-      // let promisesValues = await Promise.all(nodespromises);
-      // for (const iterator of promisesValues) {
-      //   const listeFiltered = this.filterList(iterator);
-      //   this.items = [...this.items, ...listeFiltered];
-      // }
-    },
+         for (const element of selection) {
+            this.addItemToList(element);
+         }
 
-    getLeafDbIds(selections) {
-      const dbIds = selections.map((el) => {
-        return bimObjectManagerService.getLeafDbIds(el.model, el.selection);
-      });
-      return Promise.all(dbIds);
-    },
+         // let promisesValues = await Promise.all(nodespromises);
+         // for (const iterator of promisesValues) {
+         //   const listeFiltered = this.filterList(iterator);
+         //   this.config.items = [...this.config.items, ...listeFiltered];
+         // }
+      },
 
-    addItemToList({ model, selection }) {
-      const elementFound = this.items.find((el) => el.model.id === model.id);
+      getLeafDbIds(selections) {
+         const dbIds = selections.map((el) => {
+            return bimObjectManagerService.getLeafDbIds(el.model, el.selection);
+         });
+         return Promise.all(dbIds);
+      },
 
-      if (!elementFound) {
-        this.items.push({ model, selection });
-        return;
-      }
+      addItemToList({ model, selection }) {
+         const elementFound = this.config.items.find(
+            (el) => el.model.id === model.id
+         );
 
-      for (const dbId of selection) {
-        const found = elementFound.selection.find((el) => el === dbId);
-        if (!found) elementFound.selection.push(dbId);
-      }
-    },
+         if (!elementFound) {
+            this.config.items.push({ model, selection });
+            return;
+         }
 
-    changeItemCount() {
-      this.count = 0;
-      for (const item of this.items) {
-        this.count += item.selection.length;
-      }
-    },
+         for (const dbId of selection) {
+            const found = elementFound.selection.find((el) => el === dbId);
+            if (!found) elementFound.selection.push(dbId);
+         }
+      },
 
-    showReferential() {
-      const items = this.items.map(({ model, selection }) => {
-        return { model, ids: selection };
-      });
-      window.spinal.ForgeViewer.viewer.impl.selector.setAggregateSelection(
-        items
-      );
-    },
-  },
-  watch: {
-    items() {
-      this.changeItemCount();
-    },
-  },
+      changeItemCount() {
+         this.count = 0;
+         for (const item of this.config.items) {
+            this.count += item.selection.length;
+         }
+      },
+
+      showReferential() {
+         // const items = this.config.items.map(({ model, selection }) => {
+         //    return { model, ids: selection };
+         // });
+         // window.spinal.ForgeViewer.viewer.impl.selector.setAggregateSelection(
+         //    items
+         // );
+
+         this.config.items.forEach(({ model, selection }) => {
+            window.spinal.ForgeViewer.viewer.impl.selector.setSelection(
+               selection,
+               model
+            );
+         });
+      },
+
+      verifyResult() {
+         this.loadAttributeResult = true;
+         generateAutomateService
+            .getElementProperties(this.config.items, this.config.attributeName)
+            .then((result) => {
+               this.validItems = result.validItems;
+               this.invalidItems = result.invalidItems;
+               this.displayResult = true;
+               this.loadAttributeResult = false;
+            });
+      },
+
+      selectValidItemsOnModel() {
+         console.log(
+            "🚀 ~ file: selectionStep.vue ~ line 199 ~ selectValidItemsOnModel ~ this.validItems",
+            this.validItems
+         );
+      },
+
+      selectInvalidItemsOnModel() {
+         console.log(
+            "🚀 ~ file: selectionStep.vue ~ line 199 ~ selectValidItemsOnModel ~ this.validItems",
+            this.invalidItems
+         );
+      },
+   },
+   watch: {
+      // config: {
+      //    items() {
+      //       this.changeItemCount();
+      //    },
+      // },
+   },
 };
 </script>
 
 <style scoped>
 .countdiv {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  font-size: 1.2em;
+   height: 60px;
+   display: flex;
+   align-items: center;
+   font-size: 1.2em;
 }
 </style>
 
 <style>
 .sub-content .buttons .md-button .md-ripple {
-  padding: 0px !important;
+   padding: 0px !important;
 }
 </style>

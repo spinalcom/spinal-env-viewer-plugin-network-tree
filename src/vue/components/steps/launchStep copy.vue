@@ -35,39 +35,21 @@ with this file. If not, see
 
          <div v-else-if="verified">
             <div>
-               <md-button class="resultVerification md-dense md-primary">
+               <div class="resultVerification">
                   Valid item(s) :
-                  {{ validItems.length }}
-               </md-button>
-
-               <md-button class="resultVerification md-dense md-accent">
+                  {{ equipementsVerificationResult.validItems.length }}
+               </div>
+               <div class="resultVerification">
                   invalid item(s) :
-                  {{ invalidItems.length }}
-               </md-button>
-
+                  {{ equipementsVerificationResult.invalidItems.length }}
+               </div>
             </div>
 
-            <div>
-               <md-checkbox
-                  v-model="dontCreateEmptyAutomate"
-                  class="md-primary"
-               >Don't create PLCs which do not control equipment</md-checkbox>
-
-            </div>
-
-            <div>
-               <md-button
-                  :disabled="error"
-                  class="md-raised md-primary"
-                  @click="launchGeneration"
-               >Launch Generation</md-button>
-
-               <md-button
-                  :disabled="error"
-                  class="md-raised md-primary"
-               >Edit Links</md-button>
-            </div>
-
+            <md-button
+               :disabled="error"
+               class="md-raised md-primary"
+               @click="launchGeneration"
+            >Launch Generation</md-button>
          </div>
       </div>
 
@@ -101,8 +83,8 @@ import generateAutomateService from "../../../js/generateAutomateService";
 export default {
    name: "launchGeneration",
    props: {
-      automatesObj: {},
-      equipmentsObj: {},
+      automates: {},
+      equipments: {},
       attribute: {},
       error: {},
       contextId: {},
@@ -116,65 +98,50 @@ export default {
          success: 3,
          error: 4,
       };
-      // this.automatesVerificationResult = {};
-      // this.equipementsVerificationResult = {};
-
-      this.tree = [];
+      this.automatesVerificationResult = {};
+      this.equipementsVerificationResult = {};
 
       return {
          verified: false,
          valueGrouped: null,
          appState: this.STATES.normal,
-         validItems: [],
-         invalidItems: [],
-         dontCreateEmptyAutomate: true,
       };
    },
    methods: {
       async launchVerification() {
          this.appState = this.STATES.loading;
-         this.formatData().then(
-            ({ automatesProperties, equipementsProperties }) => {
-               // console.log(result);
-               generateAutomateService
-                  .createTree(
-                     automatesProperties,
-                     equipementsProperties,
-                     this.attribute
-                  )
-                  .then(({ tree, invalids, valids }) => {
-                     this.tree = tree;
-                     this.validItems = valids;
-                     this.invalidItems = invalids;
 
-                     this.verified = true;
-                     this.appState = this.STATES.normal;
-                  });
+         await this.formatData().then((result) => {
+            this.automatesVerificationResult = result.automatesProperties;
+            this.equipementsVerificationResult = result.equipementsProperties;
 
-               // this.automatesVerificationResult = result.automatesProperties;
-               // this.equipementsVerificationResult = result.equipementsProperties;
-               //    this.verified = true;
-               //    this.appState = this.STATES.normal;
-               //    this.$emit("verified");
-            }
-         );
+            this.verified = true;
+            this.appState = this.STATES.normal;
+            this.$emit("verified");
+         });
       },
 
       async launchGeneration() {
          this.appState = this.STATES.loading;
-         // const automateValid = this.automatesVerificationResult.validItems;
-         // const equipmentsValid = this.equipementsVerificationResult.validItems;
-         // const separator = this.attribute.separator;
-         // const indice = this.attribute.indice;
+
+         const automateValid = this.automatesVerificationResult.validItems;
+         const equipmentsValid = this.equipementsVerificationResult.validItems;
+
+         const separator = this.attribute.separator;
+         const indice = this.attribute.indice;
+
          return generateAutomateService
-            .createTreeNodes(
+            .createTree(
                this.contextId,
                this.selectedNodeId,
-               this.tree,
-               this.dontCreateEmptyAutomate
+               automateValid,
+               equipmentsValid,
+               separator,
+               indice
             )
             .then((result) => {
                this.appState = this.STATES.success;
+
                // setTimeout(() => {
                //   this.appState = this.STATES.normal;
                //   this.verified = false;
@@ -183,6 +150,7 @@ export default {
             .catch((err) => {
                console.error(err);
                this.appState = this.STATES.error;
+
                setTimeout(() => {
                   this.appState = this.STATES.normal;
                   this.verified = false;
@@ -200,31 +168,26 @@ export default {
       formatData() {
          const promises = [
             generateAutomateService.getElementProperties(
-               this.automatesObj.items,
-               this.automatesObj.attributeName
+               this.automates,
+               this.attribute.attributeName
             ),
             generateAutomateService.getElementProperties(
-               this.equipmentsObj.items,
-               this.equipmentsObj.attributeName
+               this.equipments,
+               this.attribute.attributeName
             ),
          ];
 
          return Promise.all(promises).then((result) => {
             return {
-               automatesProperties: result[0] && result[0].validItems,
-               equipementsProperties: result[1] && result[1].validItems,
+               automatesProperties: result[0],
+               equipementsProperties: result[1],
             };
          });
       },
    },
    computed: {
       disableVerificationButton() {
-         return (
-            (this.automatesObj.items.length === 0 &&
-               this.automatesObj.attributeName.trim().length === 0) ||
-            (this.equipmentsObj.items.length === 0 &&
-               this.equipmentsObj.attributeName.trim().length === 0)
-         );
+         return this.automates.length === 0 || this.equipments.length === 0;
       },
    },
    watch: {
