@@ -201,16 +201,22 @@ export default {
       },
 
       selectValidItemsOnModel() {
-         console.log(
-            "🚀 ~ file: selectionStep.vue ~ line 199 ~ selectValidItemsOnModel ~ this.validItems",
+         const items = generateAutomateService.classifyDbIdsByModel(
             this.validItems
+         );
+
+         window.spinal.ForgeViewer.viewer.impl.selector.setAggregateSelection(
+            items
          );
       },
 
       selectInvalidItemsOnModel() {
-         console.log(
-            "🚀 ~ file: selectionStep.vue ~ line 199 ~ selectValidItemsOnModel ~ this.validItems",
+         const items = generateAutomateService.classifyDbIdsByModel(
             this.invalidItems
+         );
+
+         window.spinal.ForgeViewer.viewer.impl.selector.setAggregateSelection(
+            items
          );
       },
    },

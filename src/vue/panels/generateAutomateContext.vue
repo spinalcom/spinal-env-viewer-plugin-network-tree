@@ -33,8 +33,8 @@ with this file. If not, see
 
          <md-step
             id="first"
-            md-label="Controllers Configuration"
-            md-description="configure automates"
+            md-label="PLC selection"
+            md-description="Select all PLC"
          >
             <div class="step-container md-scrollbar">
                <selection-step
@@ -48,8 +48,8 @@ with this file. If not, see
 
          <md-step
             id="second"
-            md-label="Items"
-            md-description="select objects to classify"
+            md-label="Selection of controlled objects"
+            md-description="Select all controlled objects"
          >
             <md-content class="step-container md-scrollbar">
                <selection-step
@@ -62,8 +62,8 @@ with this file. If not, see
 
          <md-step
             id="third"
-            md-label="Configuration Step"
-            md-description="configure"
+            md-label="Configuration PLC and objects association"
+            md-description="Wich objects are controlled by which PLC"
             :md-error="errorInConfig"
          >
             <md-content class="step-container md-scrollbar">
@@ -79,8 +79,16 @@ with this file. If not, see
 
          <md-step
             id="fourth"
+            md-label="Configure naming Convention"
+            md-description="create the network tree structure"
+         >
+            <naming-convention-step :config="data.namingConvention"></naming-convention-step>
+         </md-step>
+
+         <md-step
+            id="fifth"
             md-label="Creation Step"
-            md-description="create"
+            md-description="create the network tree structure"
          >
 
             <div class="step-container md-scrollbar">
@@ -88,6 +96,7 @@ with this file. If not, see
                   :automatesObj="data.objAutomate"
                   :equipmentsObj="data.objEquipment"
                   :attribute="data.attribute"
+                  :namingConvention="data.namingConvention"
                   :contextId="contextId"
                   :selectedNodeId="selectedNodeId"
                   :changed="changed"
@@ -106,6 +115,8 @@ with this file. If not, see
 import ConfigurationStep from "../components/steps/configurationStep.vue";
 import launchGenerationStep from "../components/steps/launchStep.vue";
 import selectionStep from "../components/steps/selectionStep.vue";
+import namingConventionStep from "../components/steps/namingConventionStep.vue";
+
 import { OBJECT_ATTR } from "../../js/attributeConfig";
 
 export default {
@@ -114,6 +125,7 @@ export default {
       "configuration-step": ConfigurationStep,
       "launch-generation-step": launchGenerationStep,
       "selection-step": selectionStep,
+      "naming-convention-step": namingConventionStep,
    },
    data() {
       return {
@@ -128,13 +140,13 @@ export default {
          selectedNodeId: "",
          data: {
             objAutomate: {
-               // attributeName: "CFA_Repère d'équipement",
-               attributeName: "CFA_Code équipement",
+               attributeName: "CFA_Repère d'équipement",
+               // attributeName: "CFA_Code équipement",
                items: [],
             },
             objEquipment: {
-               // attributeName: "CFA_Repère d'équipement",
-               attributeName: "CFA_Code équipement",
+               attributeName: "CFA_Repère d'équipement",
+               // attributeName: "CFA_Code équipement",
                items: [],
             },
             attribute: {
@@ -143,6 +155,13 @@ export default {
                flags: [],
                select: OBJECT_ATTR,
                callback: () => {},
+            },
+            namingConvention: {
+               attributeName: "",
+               useAttrValue: true,
+               personalized: {
+                  callback: () => {},
+               },
             },
             // attribute: {
             //    id: Date.now(),
@@ -255,4 +274,10 @@ export default {
 
 .generation_container .launch_content .md-button {
 }*/
+</style>
+
+<style>
+.generation_container .steppers .md-field {
+   min-height: unset;
+}
 </style>

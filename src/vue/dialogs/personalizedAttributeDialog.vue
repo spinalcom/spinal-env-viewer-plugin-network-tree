@@ -206,6 +206,7 @@ export default {
    },
 };
 </script>
+
 <style scoped>
 .personalizedDialog {
    width: 1000px;

@@ -56,13 +56,24 @@ export default {
 
    },
 
-   createTreeNodes(contextId, nodeId, tree, dontCreateEmptyAutomate = true) {
+   createTreeNodes(contextId, nodeId, tree, namingConventionConfig, dontCreateEmptyAutomate = true) {
       if (dontCreateEmptyAutomate) {
          tree = tree.filter(el => el.children.length > 0);
       }
-      const promises = tree.map(el => this._createNodes(contextId, el, nodeId));
+      const promises = tree.map(el => this._createNodes(contextId, el, nodeId, namingConventionConfig));
       return Promise.all(promises);
 
+   },
+
+   classifyDbIdsByModel(items) {
+      const res = [];
+      for (const { dbId, model } of items) {
+         const found = res.find(el => el.model.id === model.id);
+         if (found) found.ids.push(dbId);
+         else res.push({ model, ids: [dbId] });
+      }
+
+      return res;
    },
 
    /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,18 +196,18 @@ export default {
       return obj;
    },
 
-   async _createBimObjectNode({ dbId, model, color }) {
+   async _createBimObjectNode({ dbId, model, color }, namingConvention) {
       const elements = await this._getBimObjectName({ dbId, model })
       const element = elements[0];
       return window.spinal.BimObjectService.createBIMObject(element.dbId, element.name, model).then((node) => {
          const nodeId = node.id ? node.id.get() : node.info.id.get();
          const realNode = SpinalGraphService.getRealNode(nodeId);
 
-         // if (realNode.info.namingConvention) {
-         //    realNode.info.namingConvention.set(namingConvention)
-         // } else {
-         //    realNode.info.add_attr({ namingConvention: namingConvention })
-         // }
+         if (realNode.info.namingConvention) {
+            realNode.info.namingConvention.set(namingConvention)
+         } else {
+            realNode.info.add_attr({ namingConvention: namingConvention })
+         }
 
          if (realNode.info.color) {
             realNode.info.color.set(color);
@@ -208,22 +219,24 @@ export default {
       })
    },
 
-   async _createNodes(contextId, tree, parentId) {
+   async _createNodes(contextId, node, parentId, namingConventionConfig) {
       let id;
       let relationName;
 
-      if (tree.externalId && tree.dbId) {
-         id = await this._createBimObjectNode(tree);
+      const namingConvention = await this._getNamingConvetion(node, namingConventionConfig);
+
+      if (node.externalId && node.dbId) {
+         id = await this._createBimObjectNode(node, namingConvention);
          relationName = spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION
       } else {
-         id = SpinalGraphService.createNode({ name: tree.name, type: spinalNetworkTreeService.constants.NETWORK_TYPE }, new Model());
+         id = SpinalGraphService.createNode({ name: node.name, type: spinalNetworkTreeService.constants.NETWORK_TYPE, namingConvention }, new Model());
          relationName = spinalNetworkTreeService.constants.NETWORK_RELATION
       }
 
       await SpinalGraphService.addChildInContext(parentId, id, contextId, relationName, SPINAL_RELATION_PTR_LST_TYPE);
 
-      if (tree.children && tree.children.length > 0) {
-         return Promise.all(tree.children.map(el => this._createNodes(contextId, el, id)))
+      if (node.children && node.children.length > 0) {
+         return Promise.all(node.children.map(el => this._createNodes(contextId, el, id, namingConventionConfig)))
       }
 
       return []
@@ -332,4 +345,21 @@ export default {
       }
    },
 
+   async _getNamingConvetion(node, namingConventionConfig) {
+      const property = await this._getpropertyValue(node, namingConventionConfig.attributeName);
+      const value = property.displayValue;
+      if (property) {
+         return namingConventionConfig.useAttrValue ? value : eval(`(namingConventionConfig.personalized.callback)(value + "")`)
+      }
+   },
+
+   async _getpropertyValue(node, attributeName) {
+      let properties = node.properties;
+      if (typeof properties === "undefined") {
+         const res = await bimObjectManagerService.getBimObjectProperties([{ model: node.model, selection: [node.dbId] }]);
+         properties = res[0].properties;
+      }
+
+      return this._getAttributeByName(properties, attributeName);
+   }
 }

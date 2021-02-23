@@ -35,12 +35,18 @@ with this file. If not, see
 
          <div v-else-if="verified">
             <div>
-               <md-button class="resultVerification md-dense md-primary">
+               <md-button
+                  class="resultVerification md-dense md-primary"
+                  @click="selectItems(validItems)"
+               >
                   Valid item(s) :
                   {{ validItems.length }}
                </md-button>
 
-               <md-button class="resultVerification md-dense md-accent">
+               <md-button
+                  class="resultVerification md-dense md-accent"
+                  @click="selectItems(invalidItems)"
+               >
                   invalid item(s) :
                   {{ invalidItems.length }}
                </md-button>
@@ -108,6 +114,7 @@ export default {
       contextId: {},
       selectedNodeId: {},
       changed: {},
+      namingConvention: {},
    },
    data() {
       this.STATES = {
@@ -149,6 +156,7 @@ export default {
 
                      this.verified = true;
                      this.appState = this.STATES.normal;
+                     this.$emit("verified");
                   });
 
                // this.automatesVerificationResult = result.automatesProperties;
@@ -162,19 +170,18 @@ export default {
 
       async launchGeneration() {
          this.appState = this.STATES.loading;
-         // const automateValid = this.automatesVerificationResult.validItems;
-         // const equipmentsValid = this.equipementsVerificationResult.validItems;
-         // const separator = this.attribute.separator;
-         // const indice = this.attribute.indice;
+
          return generateAutomateService
             .createTreeNodes(
                this.contextId,
                this.selectedNodeId,
                this.tree,
+               this.namingConvention,
                this.dontCreateEmptyAutomate
             )
             .then((result) => {
                this.appState = this.STATES.success;
+
                // setTimeout(() => {
                //   this.appState = this.STATES.normal;
                //   this.verified = false;
@@ -215,6 +222,13 @@ export default {
                equipementsProperties: result[1] && result[1].validItems,
             };
          });
+      },
+
+      selectItems(argItems) {
+         const items = generateAutomateService.classifyDbIdsByModel(argItems);
+         window.spinal.ForgeViewer.viewer.impl.selector.setAggregateSelection(
+            items
+         );
       },
    },
    computed: {

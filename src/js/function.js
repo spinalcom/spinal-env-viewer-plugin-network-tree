@@ -10,13 +10,17 @@ export default dedent`
    */
 
    function elementIsControlled(automateAttrValue, elementAttrValue) {
-      const substr = automateAttrValue.toString().replace(/.$/,'');
+      const automateAttrValueSplited = automateAttrValue.split("-");
+      const elementAttrValueSplited = elementAttrValue.split("-");
+      const aut_substr = automateAttrValueSplited[0] + "-" + automateAttrValueSplited[1] + "-" + automateAttrValueSplited[automateAttrValueSplited.length - 1];
+      const elm_substr = elementAttrValueSplited[0] + "-" + elementAttrValueSplited[1] + "-" + elementAttrValueSplited[elementAttrValueSplited.length - 1];
+
+
+      const substr = aut_substr.toString().replace(/.$/,'');
       const regex = new RegExp(substr + '[1-9]$');
 
-      return elementAttrValue.toString().match(regex) ? true : false
-   }
-
-`
+      return elm_substr.toString().match(regex) ? true : false
+   }`
 
 
 

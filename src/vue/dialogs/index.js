@@ -9,7 +9,7 @@ import linkAutomateToProfil from './linkAutomateToProfil.vue';
 import confirmUnlikProfilDialog from "./confirmUnlikProfil.vue";
 import editAutomateLinkDialog from './editLinksDialog.vue'
 import PersonalizedAttributeDialog from "./personalizedAttributeDialog.vue"
-
+import PersonalizeNamingConvention from "./personalizeNamingConvention.vue";
 
 const dialogs = [{
     name: "createNetworkDialog",
@@ -38,6 +38,11 @@ const dialogs = [{
 {
     name: "personalizedAttributeDialog",
     vueMountComponent: Vue.extend(PersonalizedAttributeDialog),
+    parentContainer: document.body
+},
+{
+    name: "personalizeNamingConvention",
+    vueMountComponent: Vue.extend(PersonalizeNamingConvention),
     parentContainer: document.body
 }
 ]
