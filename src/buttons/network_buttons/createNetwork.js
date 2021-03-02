@@ -9,7 +9,7 @@ const {
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import networkService from "../services"
+import networkService from "../../services"
 
 class CreateNetWork extends SpinalContextApp {
   constructor() {

@@ -176,7 +176,6 @@ export default {
                this.contextId,
                this.selectedNodeId,
                this.tree,
-               this.namingConvention,
                this.dontCreateEmptyAutomate
             )
             .then((result) => {
@@ -208,15 +207,18 @@ export default {
          const promises = [
             generateAutomateService.getElementProperties(
                this.automatesObj.items,
-               this.automatesObj.attributeName
+               this.automatesObj.attributeName,
+               this.namingConvention
             ),
             generateAutomateService.getElementProperties(
                this.equipmentsObj.items,
-               this.equipmentsObj.attributeName
+               this.equipmentsObj.attributeName,
+               this.namingConvention
             ),
          ];
 
          return Promise.all(promises).then((result) => {
+            console.log("result", result);
             return {
                automatesProperties: result[0] && result[0].validItems,
                equipementsProperties: result[1] && result[1].validItems,

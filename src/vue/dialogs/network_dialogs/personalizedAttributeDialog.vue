@@ -139,13 +139,13 @@
 </template>
 
 <script>
-import flagsList from "../../js/flags";
-import { PLC_ATTR, OBJECT_ATTR } from "../../js/attributeConfig";
-import SpinalCodeMirror from "../components/code-mirror/SpinalCodeMirror.vue";
+import flagsList from "../../../js/flags";
+import { PLC_ATTR, OBJECT_ATTR } from "../../../js/attributeConfig";
+import SpinalCodeMirror from "../../components/code-mirror/SpinalCodeMirror.vue";
 
-import functionText from "../../js/function";
+import functionText from "../../../js/function";
 
-const slashIcon = require("../../assets/slash.svg");
+const slashIcon = require("../../../assets/slash.svg");
 
 export default {
    name: "personalizedAttributeDialog",

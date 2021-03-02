@@ -1,7 +1,7 @@
 import { SpinalContextApp, spinalContextMenuService } from "spinal-env-viewer-context-menu-service";
 import { SpinalGraphService, SPINAL_RELATION_PTR_LST_TYPE } from "spinal-env-viewer-graph-service";
 
-import spinalNetworkTreeService from "../services";
+import spinalNetworkTreeService from "../../services";
 
 const SIDEBAR = "GraphManagerSideBar";
 

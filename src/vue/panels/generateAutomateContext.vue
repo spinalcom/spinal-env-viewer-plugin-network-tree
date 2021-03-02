@@ -157,7 +157,7 @@ export default {
                callback: () => {},
             },
             namingConvention: {
-               attributeName: "",
+               attributeName: "CFA_Repère d'équipement",
                useAttrValue: true,
                personalized: {
                   callback: () => {},

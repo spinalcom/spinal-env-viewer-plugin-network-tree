@@ -3,13 +3,13 @@ const { SpinalMountExtention } = require("spinal-env-viewer-panel-manager-servic
 
 
 
-import dialogComponent from "./dialog.vue";
-import linkAutomateToProfil from './linkAutomateToProfil.vue';
+import dialogComponent from "./network_dialogs/dialog.vue";
+import linkAutomateToProfil from './link_to_virtual_profil/linkAutomateToProfil.vue';
 // import linkDevicesDialog from "./linkDevices.vue";
-import confirmUnlikProfilDialog from "./confirmUnlikProfil.vue";
-import editAutomateLinkDialog from './editLinksDialog.vue'
-import PersonalizedAttributeDialog from "./personalizedAttributeDialog.vue"
-import PersonalizeNamingConvention from "./personalizeNamingConvention.vue";
+import confirmUnlikProfilDialog from "./link_to_virtual_profil/confirmUnlikProfil.vue";
+import editAutomateLinkDialog from './link_to_virtual_profil/editLinksDialog.vue'
+import PersonalizedAttributeDialog from "./network_dialogs/personalizedAttributeDialog.vue"
+import PersonalizeNamingConvention from "./network_dialogs/personalizeNamingConvention.vue";
 
 const dialogs = [{
     name: "createNetworkDialog",

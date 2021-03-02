@@ -4,7 +4,7 @@ import {
 } from "spinal-env-viewer-context-menu-service";
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 
-import utilities from "../js/utilities";
+import utilities from "../../js/utilities";
 
 import {
   spinalPanelManagerService
@@ -14,13 +14,13 @@ import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import spinalNetworkTreeService from "../services";
+import spinalNetworkTreeService from "../../services";
 
 class EditAutomateLink extends SpinalContextApp {
   constructor() {
     super("Edit automate Links",
       "Edit automate Links", {
-      icon: "connect_without_contact",
+      icon: "contactless",
       icon_type: "in",
       backgroundColor: "#FF0000",
       fontColor: "#FFFFFF"

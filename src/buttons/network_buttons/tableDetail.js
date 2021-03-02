@@ -9,7 +9,7 @@ import {
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import networkTreeService from "../services";
+import networkTreeService from "../../services";
 
 
 class TableDetail extends SpinalContextApp {
@@ -17,11 +17,11 @@ class TableDetail extends SpinalContextApp {
     super(
       "See Detail",
       "See Detail", {
-        icon: "view_column",
-        icon_type: "in",
-        backgroundColor: "#FF0000",
-        fontColor: "#FFFFFF"
-      }
+      icon: "view_column",
+      icon_type: "in",
+      backgroundColor: "#FF0000",
+      fontColor: "#FFFFFF"
+    }
     );
   }
 

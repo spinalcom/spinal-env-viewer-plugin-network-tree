@@ -1,12 +1,13 @@
-import createNetworkBtn from "./createNetwork";
-import createNetworkTreeContextBtn from "./createNetworkContext";
-import addBimObjectBtn from "./addElement";
-import viewDetailBtn from "./tableDetail"
-import generateNetworkTreeBtn from "./generateAutomateContext";
-import linkProfilBtn from "./linkProfil";
-import unlinkProfil from "./unlinkProfil";
-import editLinkButton from "./editLinkButton";
-import seeSubItems from "./seeSubItems";
+import createNetworkBtn from "./network_buttons/createNetwork";
+import createNetworkTreeContextBtn from "./network_buttons/createNetworkContext";
+import addBimObjectBtn from "./network_buttons/addElement";
+import viewDetailBtn from "./network_buttons/tableDetail"
+import generateNetworkTreeBtn from "./network_buttons/generateAutomateContext";
+import seeSubItems from "./network_buttons/seeSubItems";
+
+import linkProfilBtn from "./link_to_virtual_profil/linkProfil";
+import unlinkProfil from "./link_to_virtual_profil/unlinkProfil";
+import editLinkButton from "./link_to_virtual_profil/editLinkButton";
 
 export {
   addBimObjectBtn,

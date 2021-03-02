@@ -8,9 +8,9 @@ import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import spinalNetworkTreeService from "../services";
+import spinalNetworkTreeService from "../../services";
 
-import utilities from "../js/utilities";
+import utilities from "../../js/utilities";
 
 class UnLinkAutomateToProfil extends SpinalContextApp {
   constructor() {

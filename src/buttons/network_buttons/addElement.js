@@ -7,7 +7,7 @@ import ContextGeographicService from "spinal-env-viewer-context-geographic-servi
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import networkTreeService from "../services";
+import networkTreeService from "../../services";
 
 
 class AddBimObjects extends SpinalContextApp {

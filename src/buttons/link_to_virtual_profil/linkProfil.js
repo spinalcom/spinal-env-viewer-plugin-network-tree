@@ -11,7 +11,7 @@ import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import spinalNetworkTreeService from "../services";
+import spinalNetworkTreeService from "../../services";
 
 class LinkAutomateToProfil extends SpinalContextApp {
   constructor() {
