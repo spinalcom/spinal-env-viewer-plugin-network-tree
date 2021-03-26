@@ -64,7 +64,6 @@ export default {
         return SpinalGraphService.addChild(automateItemId, profilItemId, this.OBJECT_TO_BACNET_ITEM_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
     },
 
-
     async getProfilLinked(automateId) {
         const children = await SpinalGraphService.getChildren(automateId, [this.AUTOMATES_TO_PROFILE_RELATION])
         return children.length > 0 ? children[0].id.get() : undefined;

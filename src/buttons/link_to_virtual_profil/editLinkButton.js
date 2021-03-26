@@ -15,13 +15,14 @@ import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 const SIDEBAR = "GraphManagerSideBar";
 
 import spinalNetworkTreeService from "../../services";
+const editLinkIcon = require("../../assets/link-edit.svg");
 
 class EditAutomateLink extends SpinalContextApp {
   constructor() {
-    super("Edit automate Links",
-      "Edit automate Links", {
-      icon: "contactless",
-      icon_type: "in",
+    super("Edit link between automate and profile",
+      "Edit link between automate and profile", {
+      icon: editLinkIcon,
+      icon_type: "src",
       backgroundColor: "#FF0000",
       fontColor: "#FFFFFF"
     })
@@ -39,7 +40,10 @@ class EditAutomateLink extends SpinalContextApp {
 
     const profilLinked = await utilities.getProfilLinked(nodeId);
 
-    if (typeof profilLinked !== "undefined") return true;
+    if (typeof profilLinked !== "undefined") {
+      // this.buttonCfg.fontColor = "#FFFFFF"
+      return true
+    };
 
     return -1;
   }

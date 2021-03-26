@@ -33,6 +33,9 @@ with this file. If not, see
       <md-dialog-content class="content">
          <link-component
             v-if="pageSelected === PAGES.selection"
+            :context_title="'Profils'"
+            :category_title="'Categories'"
+            :group_title="'Devices'"
             :data="data"
             :profils="profils"
             :devices="devices"
@@ -113,13 +116,9 @@ with this file. If not, see
 </template>
 
 <script>
-import attributeService from "spinal-env-viewer-plugin-attribute-manager/src/services/index";
-import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
-import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-
 import EventBus from "spinal-env-viewer-room-manager/js/event";
 import deviceProfilService from "../../../js/devices_profil_services";
-import utilities from "../../../js/utilities";
+import linkAutomateToProfilUtilities from "../../../js/link_utilities/linkAutomateToProfil";
 
 import LinkComponent from "../../components/links/LinkComponent.vue";
 import ResultComponent from "../../components/links/resultComponent.vue";
@@ -163,7 +162,11 @@ export default {
 
    mounted() {
       EventBus.$on("itemCreated", (id) => {
-         this.getAllData();
+         this.pageSelected = this.PAGES.loading;
+
+         this.getAllData().then(() => {
+            this.pageSelected = this.PAGES.selection;
+         });
       });
    },
 
@@ -172,11 +175,14 @@ export default {
          // this.physicalContextId = option.contextId;
          // // this.physicalProfilId = option.nodeId;
          // this.automates = option.automates;
+         this.pageSelected = this.PAGES.loading;
 
          this.physicalParams = option;
          this.callback = option.callback;
 
-         this.getAllData();
+         this.getAllData().then(() => {
+            this.pageSelected = this.PAGES.selection;
+         });
       },
 
       removed(option) {
@@ -185,7 +191,7 @@ export default {
 
       createLinks() {
          this.pageSelected = this.PAGES.loading;
-         return utilities
+         return linkAutomateToProfilUtilities
             .linkNodes(this.resultMaps, this.deviceSelected)
             .then((result) => {
                this.pageSelected = this.PAGES.success;
@@ -203,10 +209,13 @@ export default {
       },
 
       getAllData() {
-         deviceProfilService.getDeviceContextTreeStructure().then((result) => {
-            this.data = result;
-            this.updateProfils();
-         });
+         return deviceProfilService
+            .getDeviceContextTreeStructure()
+            .then((result) => {
+               this.data = result;
+               this.updateProfils();
+               return;
+            });
       },
 
       disabled() {
@@ -254,16 +263,20 @@ export default {
          this.pageSelected = this.PAGES.selection;
       },
 
-      async goToNext() {
+      goToNext() {
          this.pageSelected = this.PAGES.loading;
          const virtualItems = this.getItemsList(this.deviceSelected);
 
-         this.resultMaps = await utilities.createMaps(
-            this.physicalParams.automates,
-            virtualItems
-         );
+         this.createMaps(virtualItems);
+      },
 
-         this.pageSelected = this.PAGES.result;
+      createMaps(virtualItems) {
+         return linkAutomateToProfilUtilities
+            .createMaps(this.physicalParams.automates, virtualItems)
+            .then((resultMap) => {
+               this.resultMaps = resultMap;
+               this.pageSelected = this.PAGES.result;
+            });
       },
 
       /** */

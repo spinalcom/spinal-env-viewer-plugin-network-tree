@@ -143,7 +143,7 @@ export default {
          this.formatData().then(
             ({ automatesProperties, equipementsProperties }) => {
                // console.log(result);
-               generateAutomateService
+               return generateAutomateService
                   .createTree(
                      automatesProperties,
                      equipementsProperties,
@@ -218,7 +218,6 @@ export default {
          ];
 
          return Promise.all(promises).then((result) => {
-            console.log("result", result);
             return {
                automatesProperties: result[0] && result[0].validItems,
                equipementsProperties: result[1] && result[1].validItems,

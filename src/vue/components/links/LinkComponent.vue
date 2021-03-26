@@ -23,29 +23,35 @@ with this file. If not, see
 -->
 
 <template>
-  <div class="selection_container">
-    <div class="section">
-      <link-template :title="'Profils'"
-                     :data="data"
-                     :itemSelected="contextSelected"
-                     @select="selectContext"></link-template>
-    </div>
+   <div class="selection_container">
+      <div class="section">
+         <link-template
+            :title="context_title"
+            :data="data"
+            :itemSelected="contextSelected"
+            @select="selectContext"
+         ></link-template>
+      </div>
 
-    <div class="section">
-      <link-template :title="'Categories'"
-                     :data="profils"
-                     :itemSelected="profilSelected"
-                     @select="selectProfil"></link-template>
+      <div class="section">
+         <link-template
+            :title="category_title"
+            :data="profils"
+            :itemSelected="profilSelected"
+            @select="selectProfil"
+         ></link-template>
 
-    </div>
+      </div>
 
-    <div class="section">
-      <link-template :title="'Devices'"
-                     :data="devices"
-                     :itemSelected="deviceSelected"
-                     @select="selectDevice"></link-template>
-    </div>
-  </div>
+      <div class="section">
+         <link-template
+            :title="group_title"
+            :data="devices"
+            :itemSelected="deviceSelected"
+            @select="selectDevice"
+         ></link-template>
+      </div>
+   </div>
 </template>
 
 
@@ -53,45 +59,48 @@ with this file. If not, see
 import LinkToGroupTemplate from "./linkToGroupTemplate.vue";
 
 export default {
-  name: "selectionComponent",
-  props: {
-    data: {},
-    profils: {},
-    devices: {},
-    contextSelected: {},
-    profilSelected: {},
-    deviceSelected: {},
-  },
-  components: { "link-template": LinkToGroupTemplate },
-  methods: {
-    selectContext(res) {
-      this.$emit("selectContext", res);
-    },
+   name: "selectionComponent",
+   props: {
+      context_title: {},
+      category_title: {},
+      group_title: {},
+      data: {},
+      profils: {},
+      devices: {},
+      contextSelected: {},
+      profilSelected: {},
+      deviceSelected: {},
+   },
+   components: { "link-template": LinkToGroupTemplate },
+   methods: {
+      selectContext(res) {
+         this.$emit("selectContext", res);
+      },
 
-    selectProfil(res) {
-      this.$emit("selectProfil", res);
-    },
+      selectProfil(res) {
+         this.$emit("selectProfil", res);
+      },
 
-    selectDevice(res) {
-      this.$emit("selectDevice", res);
-    },
-  },
+      selectDevice(res) {
+         this.$emit("selectDevice", res);
+      },
+   },
 };
 </script>
 
 <style scoped>
 .selection_container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: stretch;
+   width: 100%;
+   height: 100%;
+   display: flex;
+   justify-content: space-between;
+   align-items: stretch;
 }
 
 .selection_container .section {
-  width: 33%;
-  border: 1px solid grey;
-  border-radius: 4% 4% 0 0;
-  padding: 15px;
+   width: 33%;
+   border: 1px solid grey;
+   border-radius: 4% 4% 0 0;
+   padding: 15px;
 }
 </style>

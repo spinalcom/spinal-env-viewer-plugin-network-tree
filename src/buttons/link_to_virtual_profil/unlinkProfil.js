@@ -14,8 +14,8 @@ import utilities from "../../js/utilities";
 
 class UnLinkAutomateToProfil extends SpinalContextApp {
   constructor() {
-    super("unlink profil",
-      "unlink profil", {
+    super("unlink automate to profile",
+      "unlink automate to profile", {
       icon: "link_off",
       icon_type: "in",
       backgroundColor: "#FF0000",

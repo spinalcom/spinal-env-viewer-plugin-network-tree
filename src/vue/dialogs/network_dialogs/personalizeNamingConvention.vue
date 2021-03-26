@@ -34,7 +34,7 @@
 
 <script>
 import SpinalCodeMirror from "../../components/code-mirror/SpinalCodeMirror.vue";
-import functionText from "../../../js/naming_convention_function";
+import functionText from "../../../js/personalized_functions/naming_convention_function";
 
 export default {
    name: "PersonalizeNamingConvention",

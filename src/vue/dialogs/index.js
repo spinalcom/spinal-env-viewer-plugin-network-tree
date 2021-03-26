@@ -11,6 +11,9 @@ import editAutomateLinkDialog from './link_to_virtual_profil/editLinksDialog.vue
 import PersonalizedAttributeDialog from "./network_dialogs/personalizedAttributeDialog.vue"
 import PersonalizeNamingConvention from "./network_dialogs/personalizeNamingConvention.vue";
 
+import LinkToGtbDialog from "./link_to_gtb/linkToGtbDialog.vue";
+import EditLinkToGTBDevice from "./link_to_gtb/confirmLinkToGTB.vue"
+
 const dialogs = [{
     name: "createNetworkDialog",
     vueMountComponent: Vue.extend(dialogComponent),
@@ -21,11 +24,6 @@ const dialogs = [{
     vueMountComponent: Vue.extend(linkAutomateToProfil),
     parentContainer: document.body
 },
-// {
-//     name: "linkDevicesDialog",
-//     vueMountComponent: Vue.extend(linkDevicesDialog),
-//     parentContainer: document.body
-// }, 
 {
     name: "confirmUnlikProfilDialog",
     vueMountComponent: Vue.extend(confirmUnlikProfilDialog),
@@ -43,6 +41,16 @@ const dialogs = [{
 {
     name: "personalizeNamingConvention",
     vueMountComponent: Vue.extend(PersonalizeNamingConvention),
+    parentContainer: document.body
+},
+{
+    name: "linkToGtbDialog",
+    vueMountComponent: Vue.extend(LinkToGtbDialog),
+    parentContainer: document.body
+},
+{
+    name: "editLinkToGTBDevice",
+    vueMountComponent: Vue.extend(EditLinkToGTBDevice),
     parentContainer: document.body
 }
 ]

@@ -1,5 +1,6 @@
 import { bimObjectManagerService } from "spinal-env-viewer-bim-manager-service";
 import { SpinalGraphService, SPINAL_RELATION_PTR_LST_TYPE } from "spinal-env-viewer-graph-service";
+import { serviceDocumentation } from "spinal-env-viewer-plugin-documentation-service";
 import spinalNetworkTreeService from '../services/index'
 
 
@@ -8,6 +9,9 @@ import spinalNetworkTreeService from '../services/index'
 
 import _ from 'lodash';
 import { OBJECT_ATTR, PLC_ATTR } from "./attributeConfig";
+
+
+export const ATTRIBUTE_CATEGORY = "default";
 
 export default {
 
@@ -188,6 +192,7 @@ export default {
             // el.namingConvention = el.property.displayValue.split(separator).splice(indice).join(separator);
             // el.property = el.property.displayValue.split(separator, indice).join(separator);
             el.property = el.property.displayValue;
+            el.isAutomate = true;
             el.color = this._generateRandomColor();
             return el;
          })
@@ -238,23 +243,29 @@ export default {
       return obj;
    },
 
-   async _createBimObjectNode({ dbId, model, color, namingConvention }) {
+   async _createBimObjectNode({ dbId, model, color, isAutomate }) {
       const elements = await this._getBimObjectName({ dbId, model })
       const element = elements[0];
       return window.spinal.BimObjectService.createBIMObject(element.dbId, element.name, model).then((node) => {
          const nodeId = node.id ? node.id.get() : node.info.id.get();
          const realNode = SpinalGraphService.getRealNode(nodeId);
 
-         if (realNode.info.namingConvention) {
-            realNode.info.namingConvention.set(namingConvention)
-         } else {
-            realNode.info.add_attr({ namingConvention: namingConvention })
-         }
+         // if (realNode.info.namingConvention) {
+         //    realNode.info.namingConvention.set(namingConvention)
+         // } else {
+         //    realNode.info.add_attr({ namingConvention: namingConvention })
+         // }
 
          if (realNode.info.color) {
             realNode.info.color.set(color);
          } else {
             realNode.info.add_attr({ color: color });
+         }
+
+         if (realNode.info.isAutomate) {
+            realNode.info.isAutomate.set(isAutomate);
+         } else {
+            realNode.info.add_attr({ isAutomate: isAutomate });
          }
 
          return nodeId;
@@ -271,17 +282,27 @@ export default {
          id = await this._createBimObjectNode(node);
          relationName = spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION
       } else {
-         id = SpinalGraphService.createNode({ name: node.name, type: spinalNetworkTreeService.constants.NETWORK_TYPE, namingConvention }, new Model());
+         id = SpinalGraphService.createNode({
+            name: node.name,
+            type: spinalNetworkTreeService.constants.NETWORK_TYPE,
+            color: node.color,
+            // namingConvention: node.namingConvention,
+            isAutomate: node.isAutomate
+         }, new Model());
          relationName = spinalNetworkTreeService.constants.NETWORK_RELATION
       }
 
-      await SpinalGraphService.addChildInContext(parentId, id, contextId, relationName, SPINAL_RELATION_PTR_LST_TYPE);
+      return this._addSpinalAttribute(id, node.namingConvention).then(async (result) => {
+         await SpinalGraphService.addChildInContext(parentId, id, contextId, relationName, SPINAL_RELATION_PTR_LST_TYPE);
 
-      if (node.children && node.children.length > 0) {
-         return Promise.all(node.children.map(el => this._createNodes(contextId, el, id)))
-      }
+         if (node.children && node.children.length > 0) {
+            return Promise.all(node.children.map(el => this._createNodes(contextId, el, id)))
+         }
 
-      return []
+         return []
+      })
+
+
 
    },
 
@@ -392,7 +413,8 @@ export default {
 
       if (property && ((property.displayValue + '').length > 0)) {
          const value = property.displayValue;
-         return namingConventionConfig.useAttrValue ? value : eval(`(namingConventionConfig.personalized.callback)(value + "")`)
+
+         return namingConventionConfig.useAttrValue ? value : eval(`(${namingConventionConfig.personalized.callback})('${value}')`)
       }
 
    },
@@ -405,6 +427,16 @@ export default {
       }
 
       return this._getAttributeByName(properties, attributeName);
+   },
+
+   _addSpinalAttribute(id, namingConvention) {
+      if (!namingConvention || namingConvention.length === 0) return;
+      const realNode = SpinalGraphService.getRealNode(id);
+      if (!realNode) return;
+
+      return serviceDocumentation.addCategoryAttribute(realNode, ATTRIBUTE_CATEGORY).then((attributeCategory) => {
+         return serviceDocumentation.addAttributeByCategory(realNode, attributeCategory, "namingConvention", namingConvention);
+      })
    }
 
 }

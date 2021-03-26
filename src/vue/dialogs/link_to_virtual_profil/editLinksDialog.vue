@@ -29,9 +29,15 @@ with this file. If not, see
       class="linkerDialogsContent"
    >
       <md-dialog-title style="text-align : center">Unlink Profil</md-dialog-title>
+
       <md-dialog-content>
-         <edit-link :data="data"></edit-link>
+         <edit-link
+            :data="data"
+            :rightTitle="'Profil Items'"
+            :leftTitle="'Automate Items'"
+         ></edit-link>
       </md-dialog-content>
+
       <md-dialog-actions>
          <md-button
             class="md-primary"

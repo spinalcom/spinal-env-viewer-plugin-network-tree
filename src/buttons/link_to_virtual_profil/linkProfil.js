@@ -15,8 +15,8 @@ import spinalNetworkTreeService from "../../services";
 
 class LinkAutomateToProfil extends SpinalContextApp {
   constructor() {
-    super("link automate to profil",
-      "link automate to profil", {
+    super("link automate to profile",
+      "link automate to profile", {
       icon: "add_link",
       icon_type: "in",
       backgroundColor: "#FF0000",

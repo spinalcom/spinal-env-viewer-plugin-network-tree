@@ -9,6 +9,12 @@ export default dedent`
    */
 
    function getNamingConvention(attributeValue) {
+      const attributeSplitted = attributeValue.split('-');
+      const before = attributeSplitted[attributeSplitted.length - 2];
+      const last = attributeSplitted[attributeSplitted.length - 1];
+
+      if(before && last) return before + "_" + last[last.length - 1];
+
       return attributeValue
    }
 
