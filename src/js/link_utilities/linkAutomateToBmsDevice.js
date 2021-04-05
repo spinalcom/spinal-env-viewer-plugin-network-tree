@@ -10,16 +10,18 @@ import { serviceDocumentation } from "spinal-env-viewer-plugin-documentation-ser
 export default {
 
    LinkBmsDeviceToBimDevices(bmsContextId, bmsDeviceId, bimDeviceId) {
-      const promises = [this.getEndpointsMap(bmsContextId, bmsDeviceId), this._getAutomateItems(bimDeviceId)]
+      const promises = [this.getEndpointsMap(bmsContextId, bmsDeviceId), this._getAutomateItems(bimDeviceId), this._getBacnetProfil(bimDeviceId)]
 
-      return Promise.all(promises).then(([bmsDevicesMap, bimDevicesMap]) => {
+      return Promise.all(promises).then(([bmsDevicesMap, bimDevicesMap, bacnetProfilId]) => {
          const prom2 = []
          bimDevicesMap.forEach((value, key) => {
             const bmsElement = bmsDevicesMap.get(key)
             if (bmsElement) {
                console.log("link item to device")
+               prom2.push(SpinalGraphService.addChild(bmsDeviceId, bacnetProfilId, "hasBacnetProfile", SPINAL_RELATION_PTR_LST_TYPE));
                prom2.push(SpinalGraphService.addChild(value.parentId, bmsElement.nodeId, SpinalBmsEndpoint.relationName, SPINAL_RELATION_PTR_LST_TYPE));
                prom2.push(SpinalGraphService.addChild(value.nodeId, bmsElement.nodeId, SpinalBmsEndpoint.relationName, SPINAL_RELATION_PTR_LST_TYPE));
+               prom2.push(SpinalGraphService.addChild(bmsElement.nodeId, value.nodeId, "hasBmsProfil", SPINAL_RELATION_PTR_LST_TYPE));
             }
          })
 
@@ -120,5 +122,11 @@ export default {
          })
       })
    },
+
+   _getBacnetProfil(bimDeviceId) {
+      return SpinalGraphService.getChildren(bimDeviceId, ["hasBacnetProfile"]).then((children) => {
+         if (children.length > 0) return children[0].id.get()
+      })
+   }
 
 }

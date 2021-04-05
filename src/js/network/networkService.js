@@ -28,10 +28,18 @@ export default {
       return SpinalGraphService.getContextWithType(CONTEXT_TYPE);
    },
 
-   getNetwork(contextId) {
-      return SpinalGraphService.getChildren(contextId, SpinalBmsNetwork.relationName).then((result) => {
-         return result.map(el => el.get())
+   async getNetwork(contextId) {
+      // return SpinalGraphService.getChildren(contextId, SpinalBmsNetwork.relationName).then((result) => {
+      //    return result.map(el => el.get())
+      // })
+
+      const organs = await SpinalGraphService.getChildrenInContext(contextId, contextId);
+      const promises = organs.map(el => SpinalGraphService.getChildren(el.id.get(), SpinalBmsNetwork.relationName));
+
+      return Promise.all(promises).then((result) => {
+         return result.flat().map(el => el.get())
       })
+
    },
 
    getDevices(networkId) {
