@@ -18,6 +18,7 @@
             :contextSelected="contextSelected"
             :profilSelected="networkSelected"
             :deviceSelected="deviceSelected"
+            :isAutomate="isAutomate"
             @selectContext="selectContext"
             @selectProfil="selectNetwork"
             @selectDevice="selectDevice"
@@ -116,7 +117,7 @@ export default {
          bmsProperty: "",
       };
 
-      this.bmsDevices = [];
+      this.bimDevices = [];
       // this.bimDevices = [];
 
       this.contextId;
@@ -128,6 +129,7 @@ export default {
          result: undefined,
          showDialog: true,
          pageSelected: this.PAGES.selection,
+         isAutomate: false,
 
          data: [],
          networks: [],
@@ -144,13 +146,15 @@ export default {
 
          this.contextId = option.contextId;
          this.nodeId = option.nodeId;
+         this.isAutomate = option.isAutomate;
 
          this.getAllData()
             .then(async () => {
                this.title = "Select context, subnetwork or the bms device";
-               this.bmsDevices = await this._getAutomates(
+               this.bimDevices = await this._getAutomates(
                   this.nodeId,
-                  this.contextId
+                  this.contextId,
+                  this.isAutomate
                ).then((result) => result.map((el) => el.get()));
                this.pageSelected = this.PAGES.selection;
             })
@@ -254,7 +258,28 @@ export default {
 
          switch (currentPage) {
             case this.PAGES.selection:
-               this._goToConfiguration();
+               if (!this.isAutomate) {
+                  this._goToConfiguration();
+               } else {
+                  console.log(
+                     this.contextSelected,
+                     this.deviceSelected,
+                     this.nodeId
+                  );
+                  linkAutomateToBmsDeviceUtilities
+                     .LinkBmsDeviceToBimDevices(
+                        this.contextSelected,
+                        this.deviceSelected,
+                        this.nodeId
+                     )
+                     .then(() => {
+                        this.pageSelected = this.PAGES.success;
+                     })
+                     .catch((err) => {
+                        console.error(err);
+                        this.pageSelected = this.PAGES.error;
+                     });
+               }
                break;
             case this.PAGES.configuration:
                this._getResult();
@@ -296,7 +321,7 @@ export default {
             invalidProfileItems: [],
          };
 
-         res.invalidAutomateItems = this.bmsDevices;
+         res.invalidAutomateItems = this.bimDevices;
          res.invalidProfileItems = bimDevices;
 
          this.title = "Edit Link";
@@ -342,8 +367,10 @@ export default {
       },
 
       disabledNextButton() {
+         /* !this.contextSelected || */
          return (
-            !this.contextSelected ||
+            (this.isAutomate && !this.deviceSelected) ||
+            !this.networkSelected ||
             this.pageSelected === this.PAGES.loading ||
             this.pageSelected === this.PAGES.result ||
             this.pageSelected === this.PAGES.success

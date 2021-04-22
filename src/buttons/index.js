@@ -1,9 +1,12 @@
 import createNetworkBtn from "./network_buttons/createNetwork";
 import createNetworkTreeContextBtn from "./network_buttons/createNetworkContext";
 import addBimObjectBtn from "./network_buttons/addElement";
-import viewDetailBtn from "./network_buttons/tableDetail"
 import generateNetworkTreeBtn from "./network_buttons/generateAutomateContext";
 import seeSubItems from "./network_buttons/seeSubItems";
+
+
+// import viewDetailBtn from "./network_buttons/tableDetail"
+
 
 import linkProfilBtn from "./link_to_virtual_profil/linkProfil";
 import editLinkButton from "./link_to_virtual_profil/editLinkButton";
@@ -15,7 +18,7 @@ export {
   addBimObjectBtn,
   createNetworkBtn,
   createNetworkTreeContextBtn,
-  viewDetailBtn,
+  // viewDetailBtn,
   generateNetworkTreeBtn,
   linkProfilBtn,
   unlinkProfil,

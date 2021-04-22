@@ -1,12 +1,6 @@
-import {
-   SpinalContextApp,
-   spinalContextMenuService
-} from "spinal-env-viewer-context-menu-service";
-import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+import { SpinalContextApp, spinalContextMenuService } from "spinal-env-viewer-context-menu-service";
 
-import {
-   spinalPanelManagerService
-} from "spinal-env-viewer-panel-manager-service";
+import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
 import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
 const SIDEBAR = "GraphManagerSideBar";
@@ -25,17 +19,21 @@ class LinkToGTBNetworkBtn extends SpinalContextApp {
    }
 
    isShown(option) {
-      const type = option.selectedNode.type.get()
-      const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
-      if (type === spinalNetworkTreeService.constants.CONTEXT_TYPE || isAutomate) return Promise.resolve(true);
+      const type = option.selectedNode.type.get();
+      const contextType = option.context.type.get();
 
-      return Promise.resolve(-1);
+      // const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
+      if (contextType !== spinalNetworkTreeService.constants.CONTEXT_TYPE || type === contextType || !nodeIsAutomate(option.selectedNode)) return Promise.resolve(-1);
+
+
+
+      return Promise.resolve(true);
    }
 
    async action(option) {
       let contextId = option.context.id.get();
       let nodeId = option.selectedNode.id.get();
-
+      const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
 
       //   if (option.selectedNode.type.get() === BIM_OBJECT_TYPE) {
       //     automates = [option.selectedNode];
@@ -46,12 +44,21 @@ class LinkToGTBNetworkBtn extends SpinalContextApp {
       spinalPanelManagerService.openPanel("linkToGtbDialog", {
          // automates
          nodeId,
-         contextId
+         contextId,
+         isAutomate
       })
    }
 
 }
 
+
+const nodeIsAutomate = (selectedNode) => {
+   const type = selectedNode.type.get();
+   if (type === BIM_OBJECT_TYPE) {
+      return selectedNode.isAutomate && selectedNode.isAutomate.get();
+   }
+   return true;
+}
 
 
 

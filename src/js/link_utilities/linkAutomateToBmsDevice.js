@@ -1,74 +1,105 @@
 import { SpinalGraphService, SPINAL_RELATION_PTR_LST_TYPE } from "spinal-env-viewer-graph-service"
-import { SpinalBmsEndpoint } from "spinal-model-bmsnetwork";
+import { SpinalBmsDevice, SpinalBmsEndpoint } from "spinal-model-bmsnetwork";
 // import spinalNetworkTreeService from '../../services/index'
 import linkAutomateToProfilUtilities from "./linkAutomateToProfil";
 
 import { ATTRIBUTE_CATEGORY } from "../generateAutomateService";
 import { serviceDocumentation } from "spinal-env-viewer-plugin-documentation-service";
 
+import linkDeviceProfileService from "./linkAutomateToProfil";
 
 export default {
 
-   LinkBmsDeviceToBimDevices(bmsContextId, bmsDeviceId, bimDeviceId) {
-      const promises = [this.getEndpointsMap(bmsContextId, bmsDeviceId), this._getAutomateItems(bimDeviceId), this._getBacnetProfil(bimDeviceId)]
+   async LinkBmsDeviceToBimDevices(bmsContextId, bmsDeviceId, bimDeviceId) {
 
-      return Promise.all(promises).then(([bmsDevicesMap, bimDevicesMap, bacnetProfilId]) => {
-         const prom2 = []
-         bimDevicesMap.forEach((value, key) => {
-            const bmsElement = bmsDevicesMap.get(key)
-            if (bmsElement) {
-               console.log("link item to device")
-               prom2.push(SpinalGraphService.addChild(bmsDeviceId, bacnetProfilId, "hasBacnetProfile", SPINAL_RELATION_PTR_LST_TYPE));
-               prom2.push(SpinalGraphService.addChild(value.parentId, bmsElement.nodeId, SpinalBmsEndpoint.relationName, SPINAL_RELATION_PTR_LST_TYPE));
-               prom2.push(SpinalGraphService.addChild(value.nodeId, bmsElement.nodeId, SpinalBmsEndpoint.relationName, SPINAL_RELATION_PTR_LST_TYPE));
-               prom2.push(SpinalGraphService.addChild(bmsElement.nodeId, value.nodeId, "hasBmsProfil", SPINAL_RELATION_PTR_LST_TYPE));
+      const profilId = await this._getBacnetProfilLinked(bimDeviceId);
+
+      if (profilId) {
+         const promises = [this.getEndpointsMap(bmsContextId, bmsDeviceId), this._getAutomateItems(bimDeviceId)];
+         const [bmsDevicesMap, bimDevicesMap] = await Promise.all(promises);
+         console.log(bmsDevicesMap, bimDevicesMap);
+         const promises2 = Array.from(bimDevicesMap.keys()).map(key => {
+            const bmsElement = bmsDevicesMap.get(key);
+            const value = bimDevicesMap.get(key);
+            if (bmsElement && value) {
+               return Promise.all([
+                  SpinalGraphService.addChild(value.parentId, bmsElement.id, SpinalBmsEndpoint.relationName, SPINAL_RELATION_PTR_LST_TYPE),
+                  SpinalGraphService.addChild(bmsElement.id, value.nodeId, linkDeviceProfileService.OBJECT_TO_BACNET_ITEM_RELATION, SPINAL_RELATION_PTR_LST_TYPE)
+               ])
             }
+            return;
          })
 
-         return Promise.all(prom2);
-      })
+         await Promise.all(promises2);
+         await SpinalGraphService.addChild(bmsDeviceId, profilId, linkDeviceProfileService.AUTOMATES_TO_PROFILE_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
+         await SpinalGraphService.addChild(bimDeviceId, bmsDeviceId, SpinalBmsDevice.relationName, SPINAL_RELATION_PTR_LST_TYPE);
+         return;
+
+      } else {
+         throw new Error(`${bimDeviceId} has no profil linked`)
+      }
+
+   },
+
+   async unLinkBmsDeviceToBimDevices(bmsContextId, bmsDeviceId, bimDeviceId) {
+
+      const profilId = await this._getBacnetProfilLinked(bimDeviceId);
+
+      if (profilId) {
+         const promises = [this.getEndpointsMap(bmsContextId, bmsDeviceId), this._getAutomateItems(bimDeviceId)];
+         const [bmsDevicesMap, bimDevicesMap] = await Promise.all(promises);
+
+         console.log(bmsDevicesMap, bimDevicesMap);
+         const promises2 = Array.from(bimDevicesMap.keys()).map(key => {
+            const bmsElement = bmsDevicesMap.get(key);
+            const value = bimDevicesMap.get(key);
+            if (bmsElement && value) {
+               return Promise.all([
+                  SpinalGraphService.removeChild(value.parentId, bmsElement.id, SpinalBmsEndpoint.relationName, SPINAL_RELATION_PTR_LST_TYPE),
+                  SpinalGraphService.removeChild(bmsElement.id, value.nodeId, linkDeviceProfileService.OBJECT_TO_BACNET_ITEM_RELATION, SPINAL_RELATION_PTR_LST_TYPE)
+               ])
+            }
+            return;
+         })
+
+         await Promise.all(promises2);
+         await SpinalGraphService.removeChild(bmsDeviceId, profilId, linkDeviceProfileService.AUTOMATES_TO_PROFILE_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
+         await SpinalGraphService.removeChild(bimDeviceId, bmsDeviceId, SpinalBmsDevice.relationName, SPINAL_RELATION_PTR_LST_TYPE);
+         console.log("end...");
+         return;
+      }
    },
 
    getEndpointsMap(bmsContextId, bmsDeviceId) {
+      const bmsDeviceMap = new Map();
 
       return SpinalGraphService.findInContext(bmsDeviceId, bmsContextId, (node) => {
          if (node.getType().get() === SpinalBmsEndpoint.nodeTypeName) {
             SpinalGraphService._addNode(node)
+            bmsDeviceMap.set(node.info.idNetwork.get(), node.info.get());
             return true;
          }
          return false;
       }).then((nodes) => {
-         const bmsDeviceMap = new Map();
 
-         const promises = nodes.map(async el => {
-            const realNode = SpinalGraphService.getRealNode(el.id.get());
-            const element = await realNode.getElement();
-            const _temp = element.get()
-            _temp.nodeId = el.id.get();
-            bmsDeviceMap.set(_temp.id, _temp);
-            return _temp;
-         })
+         return bmsDeviceMap;
 
-         return Promise.all(promises).then(() => {
-            return bmsDeviceMap;
-         })
+         // const promises = nodes.map(async el => {
+         //    const realNode = SpinalGraphService.getRealNode(el.id.get());
+         //    const element = await realNode.getElement();
+         //    const _temp = element.get()
+         //    _temp.nodeId = el.id.get();
+         //    bmsDeviceMap.set(_temp.id, _temp);
+         //    return _temp;
+         // })
+
+         // return Promise.all(promises).then(() => {
+         //    return bmsDeviceMap;
+         // })
       })
    },
 
-   // getProfilMap(deviceId) {
-
-   //    return this._getAutomateItems(deviceId).then((devices) => {
-   //       // const promises = devices.map(device => {
-
-   //       // })
-   //    })
-   // },
-
    _getAutomateItems(automateId) {
-      // return SpinalGraphService.getChildren(automateId, [spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION]).then((bimObjects) => {
-      //    return bimObjects.map(el => el.get());
-      // })
-
       const bimDeviceMap = new Map();
 
       return linkAutomateToProfilUtilities.getDeviceAndProfilData(automateId).then((result) => {
@@ -123,10 +154,17 @@ export default {
       })
    },
 
-   _getBacnetProfil(bimDeviceId) {
-      return SpinalGraphService.getChildren(bimDeviceId, ["hasBacnetProfile"]).then((children) => {
+   _getBacnetProfilLinked(bimDeviceId) {
+      return SpinalGraphService.getChildren(bimDeviceId, [linkDeviceProfileService.AUTOMATES_TO_PROFILE_RELATION]).then((children) => {
          if (children.length > 0) return children[0].id.get()
       })
-   }
+   },
 
+   _createNodeLink(profilId, deviceId, bimObjectId, endpointId, profilItemId) {
+      const promises = [SpinalGraphService.addChild(bimObjectId, endpointId, SpinalBmsEndpoint.relationName, SPINAL_RELATION_PTR_LST_TYPE),
+      SpinalGraphService.addChild(endpointId, profilItemId, linkDeviceProfileService.OBJECT_TO_BACNET_ITEM_RELATION, SPINAL_RELATION_PTR_LST_TYPE)]
+      return Promise.all(promises).then(() => {
+         return SpinalGraphService.addChild(deviceId, profilId, linkDeviceProfileService.AUTOMATES_TO_PROFILE_RELATION, SPINAL_RELATION_PTR_LST_TYPE)
+      })
+   }
 }

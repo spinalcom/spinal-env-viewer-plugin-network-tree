@@ -24,7 +24,7 @@ with this file. If not, see
 
 <template>
    <div class="selection_container">
-      <div class="section">
+      <div :class="isAutomate ? 'section' : 'middle'">
          <link-template
             :title="context_title"
             :data="data"
@@ -33,7 +33,7 @@ with this file. If not, see
          ></link-template>
       </div>
 
-      <div class="section">
+      <div :class="isAutomate ? 'section' : 'middle'">
          <link-template
             :title="category_title"
             :data="profils"
@@ -43,7 +43,10 @@ with this file. If not, see
 
       </div>
 
-      <div class="section">
+      <div
+         class="section"
+         v-if="isAutomate"
+      >
          <link-template
             :title="group_title"
             :data="devices"
@@ -70,6 +73,10 @@ export default {
       contextSelected: {},
       profilSelected: {},
       deviceSelected: {},
+      isAutomate: {
+         type: Boolean,
+         default: true,
+      },
    },
    components: { "link-template": LinkToGroupTemplate },
    methods: {
@@ -99,6 +106,13 @@ export default {
 
 .selection_container .section {
    width: 33%;
+   border: 1px solid grey;
+   border-radius: 4% 4% 0 0;
+   padding: 15px;
+}
+
+.selection_container .middle {
+   width: 49%;
    border: 1px solid grey;
    border-radius: 4% 4% 0 0;
    padding: 15px;

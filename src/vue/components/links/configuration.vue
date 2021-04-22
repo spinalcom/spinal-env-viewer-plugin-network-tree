@@ -56,11 +56,17 @@ export default {
    },
    methods: {
       getBmsProperties() {
-         const device = new SpinalBmsDevice();
-         return device._attribute_names.map((element) => ({
-            name: element,
-            value: element,
-         }));
+         // const device = new SpinalBmsDevice();
+         // return device._attribute_names.map((element) => ({
+         //    name: element,
+         //    value: element,
+         // }));
+         return [
+            { name: "Device ID", value: "idNetwork" },
+            { name: "Device Name", value: "name" },
+            { name: "IP address", value: "address" },
+            { name: "Mac address", value: "hostId" },
+         ];
       },
    },
 };
