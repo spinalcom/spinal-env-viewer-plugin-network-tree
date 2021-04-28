@@ -75,7 +75,7 @@ export default {
       deviceSelected: {},
       isAutomate: {
          type: Boolean,
-         default: false,
+         default: true,
       },
    },
    components: { "link-template": LinkToGroupTemplate },

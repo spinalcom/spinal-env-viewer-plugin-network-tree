@@ -45,7 +45,7 @@ class LinkToGTBNetworkBtn extends SpinalContextApp {
          // automates
          nodeId,
          contextId,
-         isAutomate
+         // isAutomate: isAutomate || false
       })
    }
 

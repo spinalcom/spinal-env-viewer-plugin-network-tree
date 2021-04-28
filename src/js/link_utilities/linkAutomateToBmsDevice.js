@@ -107,7 +107,7 @@ export default {
             const attrs = await this.getItemIO(profileItem.id);
             for (const attr of attrs) {
                attr.parentId = automateItem.id;
-               bimDeviceMap.set(parseInt(attr.IDX), attr);
+               bimDeviceMap.set((parseInt(attr.IDX) + 1), attr);
             }
             return;
          })

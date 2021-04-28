@@ -261,23 +261,23 @@ export default {
 
          switch (currentPage) {
             case this.PAGES.selection:
-               if (!this.isAutomate) {
-                  this._goToConfiguration();
-               } else {
-                  linkAutomateToBmsDeviceUtilities
-                     .LinkBmsDeviceToBimDevices(
-                        this.contextSelected,
-                        this.deviceSelected,
-                        this.nodeId
-                     )
-                     .then(() => {
-                        this.pageSelected = this.PAGES.success;
-                     })
-                     .catch((err) => {
-                        console.error(err);
-                        this.pageSelected = this.PAGES.error;
-                     });
-               }
+               // if (!this.isAutomate) {
+               this._goToConfiguration();
+               // } else {
+               // linkAutomateToBmsDeviceUtilities
+               //    .LinkBmsDeviceToBimDevices(
+               //       this.contextSelected,
+               //       this.deviceSelected,
+               //       this.nodeId
+               //    )
+               //    .then(() => {
+               //       this.pageSelected = this.PAGES.success;
+               //    })
+               //    .catch((err) => {
+               //       console.error(err);
+               //       this.pageSelected = this.PAGES.error;
+               //    });
+               // }
                break;
             case this.PAGES.configuration:
                this._getResult();
