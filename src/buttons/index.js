@@ -3,10 +3,8 @@ import createNetworkTreeContextBtn from "./network_buttons/createNetworkContext"
 import addBimObjectBtn from "./network_buttons/addElement";
 import generateNetworkTreeBtn from "./network_buttons/generateAutomateContext";
 import seeSubItems from "./network_buttons/seeSubItems";
-
-
+import clearAutomateContent from "./network_buttons/clearAutomateContent";
 // import viewDetailBtn from "./network_buttons/tableDetail"
-
 
 import linkProfilBtn from "./link_to_virtual_profil/linkProfil";
 import editLinkButton from "./link_to_virtual_profil/editLinkButton";
@@ -24,5 +22,6 @@ export {
   unlinkProfil,
   editLinkButton,
   seeSubItems,
-  linkToGTBNetworkBtn
+  linkToGTBNetworkBtn,
+  clearAutomateContent
 }

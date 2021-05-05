@@ -52,7 +52,7 @@ with this file. If not, see
             v-else-if="pageSelected === PAGES.result"
          >
             <result-component
-               v-for="item in resultMaps.values()"
+               v-for="item in linkResult"
                class="result-component"
                :ref="`result-${item.automate.id}`"
                :key="item.automate.id"
@@ -63,24 +63,36 @@ with this file. If not, see
          </md-content>
 
          <div
-            class="loading"
+            class="state"
             v-else-if="pageSelected === PAGES.loading"
          >
             <md-progress-spinner md-mode="indeterminate"></md-progress-spinner>
          </div>
 
          <div
-            class="loading"
+            class="state"
             v-else-if="pageSelected === PAGES.success"
          >
             <md-icon class="md-size-5x">done</md-icon>
          </div>
 
          <div
-            class="loading"
+            class="state"
             v-else-if="pageSelected === PAGES.error"
          >
             <md-icon class="md-size-5x">error_outline</md-icon>
+         </div>
+
+         <div
+            class="progress-bar"
+            v-else-if="pageSelected === PAGES.creation"
+         >
+            <div class="percent-number">{{percent}} %</div>
+            <md-progress-bar
+               class="percent-bar"
+               md-mode="buffer"
+               :md-value="percent"
+            ></md-progress-bar>
          </div>
 
       </md-dialog-content>
@@ -122,6 +134,8 @@ import linkAutomateToProfilUtilities from "../../../js/link_utilities/linkAutoma
 
 import LinkComponent from "../../components/links/LinkComponent.vue";
 import ResultComponent from "../../components/links/resultComponent.vue";
+import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
 export default {
    name: "dialogComponent",
@@ -137,14 +151,16 @@ export default {
          selection: 0,
          result: 1,
          loading: 2,
-         success: 3,
-         error: 4,
+         creation: 3,
+         success: 4,
+         error: 5,
       };
 
       // this.validMaps = new Map();
       // this.invalidMaps = new Map();
 
       return {
+         percent: 0,
          resultMaps: new Map(),
          showDialog: true,
          pageSelected: this.PAGES.selection,
@@ -171,16 +187,22 @@ export default {
    },
 
    methods: {
-      opened(option) {
+      async opened(option) {
          // this.physicalContextId = option.contextId;
          // // this.physicalProfilId = option.nodeId;
          // this.automates = option.automates;
          this.pageSelected = this.PAGES.loading;
 
-         this.physicalParams = option;
          this.callback = option.callback;
 
-         this.getAllData().then(() => {
+         Promise.all([
+            this.getAllData(),
+            this.getAutomates(option.contextId, option.nodeId),
+         ]).then(([data, automates]) => {
+            this.physicalParams = {
+               contextId: option.contextId,
+               automates: automates.map((el) => el.get()),
+            };
             this.pageSelected = this.PAGES.selection;
          });
       },
@@ -189,17 +211,94 @@ export default {
          this.showDialog = false;
       },
 
+      getAutomates(contextId, nodeId) {
+         const nodeInfo = SpinalGraphService.getInfo(nodeId);
+         if (
+            nodeInfo.type.get() === BIM_OBJECT_TYPE &&
+            nodeInfo.isAutomate &&
+            nodeInfo.isAutomate.get()
+         ) {
+            return Promise.resolve([nodeInfo]);
+         }
+
+         return SpinalGraphService.findInContext(nodeId, contextId, (node) => {
+            if (
+               node.getType().get() === BIM_OBJECT_TYPE &&
+               node.info.isAutomate &&
+               node.info.isAutomate.get()
+            ) {
+               SpinalGraphService._addNode(node);
+               return true;
+            }
+            return false;
+         });
+      },
+
       createLinks() {
-         this.pageSelected = this.PAGES.loading;
-         return linkAutomateToProfilUtilities
-            .linkNodes(this.resultMaps, this.deviceSelected)
-            .then((result) => {
+         this.pageSelected = this.PAGES.creation;
+         const liste = Array.from(this.resultMaps.keys()).map((key) => {
+            return [key, this.resultMaps.get(key)];
+         });
+
+         this.linkNode(liste, this.deviceSelected, liste.length)
+            .then(() => {
                this.pageSelected = this.PAGES.success;
             })
             .catch((err) => {
                console.error(err);
                this.pageSelected = this.PAGES.error;
             });
+
+         // return linkAutomateToProfilUtilities
+         //    .linkNodes(this.resultMaps, this.deviceSelected)
+         //    .then((result) => {
+         //       this.pageSelected = this.PAGES.success;
+         //    })
+         //    .catch((err) => {
+         //       console.error(err);
+         //       this.pageSelected = this.PAGES.error;
+         //    });
+      },
+
+      linkNode(liste, deviceProfilId, listeLength) {
+         return new Promise((resolve, reject) => {
+            this.linkNodeRecur(liste, deviceProfilId, listeLength, resolve);
+         });
+      },
+
+      linkNodeRecur(liste, deviceProfilId, listeLength, resolve) {
+         const item = liste.shift();
+         if (item) {
+            const [key, value] = item;
+            linkAutomateToProfilUtilities
+               .linkProfilToDevice(key, deviceProfilId, value.valids)
+               .then(() => {
+                  this.percent = Math.floor(
+                     (100 * (listeLength - liste.length)) / listeLength
+                  );
+
+                  this.linkNodeRecur(
+                     liste,
+                     deviceProfilId,
+                     listeLength,
+                     resolve
+                  );
+               })
+               .catch(() => {
+                  this.percent = Math.floor(
+                     (100 * (listeLength - liste.length)) / listeLength
+                  );
+
+                  this.linkNodeRecur(
+                     liste,
+                     deviceProfilId,
+                     listeLength,
+                     resolve
+                  );
+               });
+         } else {
+            resolve(true);
+         }
       },
 
       closeDialog(closeResult) {
@@ -219,7 +318,7 @@ export default {
       },
 
       disabled() {
-         return !(this.contextSelected && this.profilSelected);
+         return !(this.contextSelected && this.deviceSelected);
       },
 
       getItemsList(deviceId) {
@@ -266,8 +365,13 @@ export default {
       goToNext() {
          this.pageSelected = this.PAGES.loading;
          const virtualItems = this.getItemsList(this.deviceSelected);
-
-         this.createMaps(virtualItems);
+         return this.createMaps(virtualItems)
+            .then(() => {
+               this.pageSelected = this.PAGES.result;
+            })
+            .catch((err) => {
+               this.pageSelected = this.PAGES.error;
+            });
       },
 
       createMaps(virtualItems) {
@@ -275,7 +379,6 @@ export default {
             .createMaps(this.physicalParams.automates, virtualItems)
             .then((resultMap) => {
                this.resultMaps = resultMap;
-               this.pageSelected = this.PAGES.result;
             });
       },
 
@@ -299,6 +402,11 @@ export default {
                processing = false;
             }
          } while (processing);
+      },
+   },
+   computed: {
+      linkResult() {
+         return Array.from(this.resultMaps.values());
       },
    },
    watch: {
@@ -328,12 +436,30 @@ export default {
    padding: 0 10px 24px 24px;
 }
 
-.mdDialogContainer .content .loading {
+.mdDialogContainer .content .state {
    width: 100%;
    height: 100%;
    display: flex;
    justify-content: center;
    align-items: center;
+}
+
+.mdDialogContainer .content .progress-bar {
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+}
+
+.mdDialogContainer .content .progress-bar .percent-number {
+   font-size: 1.8em;
+   margin-bottom: 10px;
+}
+
+.mdDialogContainer .content .progress-bar .percent-bar {
+   width: 90%;
 }
 
 .mdDialogContainer .content .results {

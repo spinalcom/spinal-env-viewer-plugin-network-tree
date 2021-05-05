@@ -2,12 +2,12 @@ import {
   SpinalContextApp,
   spinalContextMenuService
 } from "spinal-env-viewer-context-menu-service";
-import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 
 import {
   spinalPanelManagerService
 } from "spinal-env-viewer-panel-manager-service";
-import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
+
+
 
 const SIDEBAR = "GraphManagerSideBar";
 
@@ -34,21 +34,24 @@ class LinkAutomateToProfil extends SpinalContextApp {
   async action(option) {
     let contextId = option.context.id.get();
     let nodeId = option.selectedNode.id.get();
-    let automates;
 
-    if (option.selectedNode.type.get() === BIM_OBJECT_TYPE) {
-      automates = [option.selectedNode];
-    } else {
-      automates = await SpinalGraphService.getChildren(nodeId, [spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION])
-    }
+
+    // if (option.selectedNode.type.get() === BIM_OBJECT_TYPE && option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()) {
+    //   automates = [option.selectedNode];
+    // } else {
+    //   automates = await SpinalGraphService.getChildren(nodeId, [spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION])
+    // }
 
     spinalPanelManagerService.openPanel("linkAutomateToProfilDialog", {
       contextId,
-      automates: automates.map(el => el.get())
+      nodeId
     })
   }
 
 }
+
+
+
 
 const linkAutomateToProfil = new LinkAutomateToProfil();
 

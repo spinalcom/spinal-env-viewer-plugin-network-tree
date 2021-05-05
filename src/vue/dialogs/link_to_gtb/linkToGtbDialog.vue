@@ -35,24 +35,36 @@
          ></confirm-link>
 
          <div
-            class="loading"
+            class="state"
             v-else-if="pageSelected === PAGES.loading"
          >
             <md-progress-spinner md-mode="indeterminate"></md-progress-spinner>
          </div>
 
          <div
-            class="loading"
+            class="state"
             v-else-if="pageSelected === PAGES.error"
          >
             <md-icon class="md-size-5x">error_outline</md-icon>
          </div>
 
          <div
-            class="loading"
+            class="state"
             v-else-if="pageSelected === PAGES.success"
          >
             <md-icon class="md-size-5x">done</md-icon>
+         </div>
+
+         <div
+            class="progress-bar"
+            v-else-if="pageSelected === PAGES.creation"
+         >
+            <div class="percent-number">{{percent}} %</div>
+            <md-progress-bar
+               class="percent-bar"
+               md-mode="buffer"
+               :md-value="percent"
+            ></md-progress-bar>
          </div>
 
       </md-dialog-content>
@@ -110,9 +122,10 @@ export default {
          selection: 0,
          configuration: 1,
          result: 2,
-         loading: 3,
-         success: 4,
-         error: 5,
+         creation: 3,
+         loading: 4,
+         success: 5,
+         error: 6,
       };
 
       this.configuration = {
@@ -128,6 +141,7 @@ export default {
       this.callback = undefined;
 
       return {
+         percent: 0,
          title: "",
          result: undefined,
          showDialog: true,
@@ -179,17 +193,9 @@ export default {
       },
 
       createLink() {
-         this.pageSelected = this.PAGES.loading;
-
-         const promises = this.result.valids.map((el) => {
-            return linkAutomateToBmsDeviceUtilities.LinkBmsDeviceToBimDevices(
-               this.contextSelected,
-               el.profileItem.id,
-               el.automateItem.id
-            );
-         });
-
-         return Promise.all(promises)
+         this.pageSelected = this.PAGES.creation;
+         const liste = [...this.result.valids];
+         this.createLinkProm(liste, this.contextSelected, liste.length)
             .then(() => {
                this.pageSelected = this.PAGES.success;
             })
@@ -197,6 +203,55 @@ export default {
                console.error(err);
                this.pageSelected = this.PAGES.error;
             });
+      },
+
+      createLinkProm(liste, contextId, listeLenth) {
+         // const promises = this.result.valids.map((el) => {
+         //    return linkAutomateToBmsDeviceUtilities.LinkBmsDeviceToBimDevices(
+         //       this.contextSelected,
+         //       el.profileItem.id,
+         //       el.automateItem.id
+         //    );
+         // });
+
+         // return Promise.all(promises)
+         //    .then(() => {
+         //       this.pageSelected = this.PAGES.success;
+         //    })
+         //    .catch((err) => {
+         //       console.error(err);
+         //       this.pageSelected = this.PAGES.error;
+         //    });
+
+         return new Promise((resolve, reject) => {
+            this.createLinkRec(liste, contextId, listeLenth, resolve);
+         });
+      },
+
+      createLinkRec(liste, contextId, listeLenth, resolve) {
+         const item = liste.shift();
+         if (item) {
+            linkAutomateToBmsDeviceUtilities
+               .LinkBmsDeviceToBimDevices(
+                  contextId,
+                  item.profileItem.id,
+                  item.automateItem.id
+               )
+               .then(() => {
+                  this.percent = Math.floor(
+                     (100 * (listeLenth - liste.length)) / listeLenth
+                  );
+                  this.createLinkRec(liste, contextId, listeLenth, resolve);
+               })
+               .catch((err) => {
+                  this.percent = Math.floor(
+                     (100 * (listeLenth - liste.length)) / listeLenth
+                  );
+                  this.createLinkRec(liste, contextId, listeLenth, resolve);
+               });
+         } else {
+            resolve(true);
+         }
       },
 
       _getAutomates(selectionNodeId, contextId) {
@@ -512,11 +567,29 @@ export default {
    padding: 0 10px 24px 24px;
 }
 
-.mdDialogContainer .content .loading {
+.mdDialogContainer .content .state {
    width: 100%;
    height: 100%;
    display: flex;
    justify-content: center;
    align-items: center;
+}
+
+.mdDialogContainer .content .progress-bar {
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+}
+
+.mdDialogContainer .content .progress-bar .percent-number {
+   font-size: 1.8em;
+   margin: 10px 0;
+}
+
+.mdDialogContainer .content .progress-bar .percent-bar {
+   width: 90%;
 }
 </style>

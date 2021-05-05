@@ -33,8 +33,11 @@ with this file. If not, see
             Verify
          </md-button>
 
-         <div v-else-if="verified">
-            <div>
+         <div
+            class="content-items"
+            v-else-if="verified"
+         >
+            <div class="content-item">
                <md-button
                   class="resultVerification md-dense md-primary"
                   @click="selectItems(validItems)"
@@ -53,25 +56,46 @@ with this file. If not, see
 
             </div>
 
-            <div>
-               <md-checkbox
-                  v-model="dontCreateEmptyAutomate"
-                  class="md-primary"
-               >Don't create PLCs which do not control equipment</md-checkbox>
+            <div class="content-item classifyContent">
+               <div class="checkbox">
+                  <md-checkbox
+                     v-model="classify.class"
+                     class="md-primary"
+                  >Classify controllers By</md-checkbox>
+               </div>
+
+               <div class="input">
+                  <md-field>
+                     <label>Attribute name</label>
+                     <md-input
+                        :disabled="!classify.class"
+                        v-model="classify.by"
+                     ></md-input>
+                  </md-field>
+               </div>
 
             </div>
 
-            <div>
+            <div class="content-item">
+               <md-checkbox
+                  v-model="dontCreateEmptyAutomate"
+                  class="md-primary"
+               >Don't create Controllers which do not control equipment</md-checkbox>
+
+            </div>
+
+            <div class="content-item">
                <md-button
                   :disabled="error"
                   class="md-raised md-primary"
                   @click="launchGeneration"
                >Launch Generation</md-button>
 
+               <!--  
                <md-button
                   :disabled="error"
                   class="md-raised md-primary"
-               >Edit Links</md-button>
+               >Edit Links</md-button>-->
             </div>
 
          </div>
@@ -82,6 +106,20 @@ with this file. If not, see
          v-else-if="appState === STATES.loading"
       >
          <md-progress-spinner md-mode="indeterminate"></md-progress-spinner>
+      </div>
+
+      <div
+         class="progress-bar"
+         v-else-if="appState === STATES.creation"
+      >
+
+         <div class="percent-number">{{percent}} %</div>
+         <!-- md-mode="determinate" -->
+         <md-progress-bar
+            class="percent-bar"
+            md-mode="buffer"
+            :md-value="percent"
+         ></md-progress-bar>
       </div>
 
       <div
@@ -101,8 +139,10 @@ with this file. If not, see
 </template>
 
 <script>
+import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 // import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 import generateAutomateService from "../../../js/generateAutomateService";
+import spinalNetworkTreeService from "../../../services/index";
 
 export default {
    name: "launchGeneration",
@@ -120,8 +160,9 @@ export default {
       this.STATES = {
          loading: 1,
          normal: 2,
-         success: 3,
-         error: 4,
+         creation: 3,
+         success: 4,
+         error: 5,
       };
       // this.automatesVerificationResult = {};
       // this.equipementsVerificationResult = {};
@@ -129,12 +170,17 @@ export default {
       this.tree = [];
 
       return {
+         percent: 0,
          verified: false,
          valueGrouped: null,
          appState: this.STATES.normal,
          validItems: [],
          invalidItems: [],
          dontCreateEmptyAutomate: true,
+         classify: {
+            class: true,
+            by: "Niveau",
+         },
       };
    },
    methods: {
@@ -169,31 +215,137 @@ export default {
       },
 
       async launchGeneration() {
-         this.appState = this.STATES.loading;
+         // this.appState = this.STATES.loading;
+         // return generateAutomateService
+         //    .createTreeNodes(
+         //       this.contextId,
+         //       this.selectedNodeId,
+         //       this.tree,
+         //       this.dontCreateEmptyAutomate,
+         //    )
+         //    .then((result) => {
+         //       this.appState = this.STATES.success;
+         //       // setTimeout(() => {
+         //       //   this.appState = this.STATES.normal;
+         //       //   this.verified = false;
+         //       // }, 1000);
+         //    })
+         //    .catch((err) => {
+         //       console.error(err);
+         //       this.appState = this.STATES.error;
+         //       setTimeout(() => {
+         //          this.appState = this.STATES.normal;
+         //          this.verified = false;
+         //       }, 1000);
+         //    });
 
-         return generateAutomateService
-            .createTreeNodes(
-               this.contextId,
-               this.selectedNodeId,
-               this.tree,
-               this.dontCreateEmptyAutomate
-            )
-            .then((result) => {
-               this.appState = this.STATES.success;
+         this.appState = this.STATES.creation;
+         let tree = this.tree;
 
-               // setTimeout(() => {
-               //   this.appState = this.STATES.normal;
-               //   this.verified = false;
-               // }, 1000);
-            })
-            .catch((err) => {
-               console.error(err);
-               this.appState = this.STATES.error;
-               setTimeout(() => {
-                  this.appState = this.STATES.normal;
-                  this.verified = false;
-               }, 1000);
-            });
+         if (this.dontCreateEmptyAutomate) {
+            tree = this.tree.filter((el) => el.children.length > 0);
+         }
+
+         const Listelength = tree.length;
+
+         // this.createNode(tree, this.contextId, this.selectedNodeId, Listelength)
+         //    .then(() => {
+         //       this.appState = this.STATES.success;
+         //    })
+         //    .catch(() => {
+         //       this.appState = this.STATES.error;
+         //       setTimeout(() => {
+         //          this.appState = this.STATES.normal;
+         //          this.verified = false;
+         //       }, 1000);
+         //    });
+      },
+
+      createNode(liste, contextId, nodeId, Listelength) {
+         return new Promise((resolve, reject) => {
+            this.createNodeRecur(
+               liste,
+               contextId,
+               nodeId,
+               Listelength,
+               resolve
+            );
+         });
+      },
+
+      async createNodeRecur(liste, contextId, nodeId, Listelength, resolve) {
+         const item = liste.shift();
+         if (item) {
+            const parentId = await this.getOrCreateParentId(
+               contextId,
+               nodeId,
+               item
+            );
+
+            generateAutomateService
+               ._createNodes(contextId, item, parentId)
+               .then(() => {
+                  this.percent = Math.floor(
+                     (100 * (Listelength - liste.length)) / Listelength
+                  );
+
+                  this.createNodeRecur(
+                     liste,
+                     contextId,
+                     nodeId,
+                     Listelength,
+                     resolve
+                  );
+               })
+               .catch((err) => {
+                  console.error(err);
+                  this.percent = Math.floor(
+                     (100 * (Listelength - liste.length)) / Listelength
+                  );
+
+                  this.createNodeRecur(
+                     liste,
+                     contextId,
+                     nodeId,
+                     Listelength,
+                     resolve
+                  );
+               });
+         } else {
+            resolve(true);
+         }
+      },
+
+      async getOrCreateParentId(contextId, nodeId, item) {
+         if (!this.classify.class) {
+            return nodeId;
+         }
+
+         const val = this.classify.by;
+
+         const found = item.properties.find(
+            (el) => el.attributeName == val || el.displayName == val
+         );
+
+         const parentName =
+            found && found.displayValue ? found.displayValue : "Others";
+
+         const children = await SpinalGraphService.getChildren(nodeId, [
+            spinalNetworkTreeService.constants.NETWORK_RELATION,
+         ]);
+
+         const parentFound = children.find((el) => el.name.get() == parentName);
+
+         if (parentFound) return parentFound.id.get();
+
+         const parent = await spinalNetworkTreeService.addNetwork(
+            parentName,
+            nodeId,
+            contextId
+         );
+
+         SpinalGraphService._addNode(parent);
+         return parent.getId().get();
       },
 
       _displayResult(result) {
@@ -266,11 +418,58 @@ export default {
    display: flex;
    justify-content: center;
 }
+
+.content .buttons .content-items {
+   width: 100%;
+   height: 100%;
+}
+
+.content .buttons .content-items .content-item {
+   width: 100%;
+   height: 50px;
+   margin-bottom: 5px;
+}
+
+.content .buttons .content-items .content-item.classifyContent {
+   display: flex;
+   align-items: center;
+}
+
+.content
+   .buttons
+   .content-items
+   .content-item.content-item.classifyContent
+   .checkbox {
+}
+
+.content
+   .buttons
+   .content-items
+   .content-item.content-item.classifyContent
+   .input {
+}
+
 .state {
    width: 100%;
    height: 100%;
    display: flex;
    justify-content: center;
    align-items: center;
+}
+
+.progress-bar {
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+}
+.progress-bar .percent-number {
+   font-size: 1.8em;
+   margin: 10px 0;
+}
+.progress-bar .percent-bar {
+   width: 90%;
 }
 </style>

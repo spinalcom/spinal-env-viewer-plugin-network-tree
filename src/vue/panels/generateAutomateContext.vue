@@ -33,8 +33,8 @@ with this file. If not, see
 
          <md-step
             id="first"
-            md-label="PLC selection"
-            md-description="Select all PLC"
+            md-label="Controller selection"
+            md-description="Select all controllers"
          >
             <div class="step-container md-scrollbar">
                <selection-step
@@ -62,8 +62,8 @@ with this file. If not, see
 
          <md-step
             id="third"
-            md-label="Configuration PLC and objects association"
-            md-description="Wich objects are controlled by which PLC"
+            md-label="Configuration Controllers and objects association"
+            md-description="Wich objects are controlled by which controller"
             :md-error="errorInConfig"
          >
             <md-content class="step-container md-scrollbar">

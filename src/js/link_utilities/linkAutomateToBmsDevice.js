@@ -15,6 +15,7 @@ export default {
       const profilId = await this._getBacnetProfilLinked(bimDeviceId);
 
       if (profilId) {
+         await this.unLinkProfilToBmsDevice(bmsContextId, bmsDeviceId);
          const promises = [this.getEndpointsMap(bmsContextId, bmsDeviceId), this._getAutomateItems(bimDeviceId)];
          const [bmsDevicesMap, bimDevicesMap] = await Promise.all(promises);
          console.log(bmsDevicesMap, bimDevicesMap);
@@ -36,9 +37,8 @@ export default {
          return;
 
       } else {
-         throw new Error(`${bimDeviceId} has no profil linked`)
+         throw new Error(`${bimDeviceId} has no profil linked`);
       }
-
    },
 
    async unLinkBmsDeviceToBimDevices(bmsContextId, bmsDeviceId, bimDeviceId) {
@@ -49,7 +49,6 @@ export default {
          const promises = [this.getEndpointsMap(bmsContextId, bmsDeviceId), this._getAutomateItems(bimDeviceId)];
          const [bmsDevicesMap, bimDevicesMap] = await Promise.all(promises);
 
-         console.log(bmsDevicesMap, bimDevicesMap);
          const promises2 = Array.from(bimDevicesMap.keys()).map(key => {
             const bmsElement = bmsDevicesMap.get(key);
             const value = bimDevicesMap.get(key);
@@ -68,6 +67,21 @@ export default {
          console.log("end...");
          return;
       }
+   },
+
+   async unLinkProfilToBmsDevice(bmsContextId, bmsDeviceId) {
+      const relations = SpinalGraphService.getRelationNames(bmsDeviceId);
+
+      if (relations.indexOf(linkDeviceProfileService.AUTOMATES_TO_PROFILE_RELATION) > -1) {
+         return SpinalGraphService.findInContext(bmsDeviceId, bmsContextId, (node) => {
+            if (node.hasRelation(linkDeviceProfileService.OBJECT_TO_BACNET_ITEM_RELATION)) {
+               return node.removeRelation(linkDeviceProfileService.OBJECT_TO_BACNET_ITEM_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
+            }
+            return false;
+         })
+      }
+
+      return;
    },
 
    getEndpointsMap(bmsContextId, bmsDeviceId) {

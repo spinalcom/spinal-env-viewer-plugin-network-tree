@@ -31,19 +31,19 @@ with this file. If not, see
       <div class="content">
 
          <div
-            class="invalids textDiv"
-            v-tooltip="`${results.invalidAutomateItems.length} Items not linked`"
-         >
-            <div class="value">{{results.invalidAutomateItems.length}}</div>
-            <div class="name">Items not linked</div>
-         </div>
-
-         <div
             class="valids textDiv"
             v-tooltip="`${results.valids.length} Items linked`"
          >
             <div class="value">{{results.valids.length}}</div>
             <div class="name">Items linked</div>
+         </div>
+
+         <div
+            class="invalids textDiv"
+            v-tooltip="`${results.invalidAutomateItems.length} Items not linked`"
+         >
+            <div class="value">{{results.invalidAutomateItems.length}}</div>
+            <div class="name">Items not linked</div>
          </div>
 
          <div class="button">
