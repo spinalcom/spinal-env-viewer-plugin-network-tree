@@ -248,17 +248,17 @@ export default {
 
          const Listelength = tree.length;
 
-         // this.createNode(tree, this.contextId, this.selectedNodeId, Listelength)
-         //    .then(() => {
-         //       this.appState = this.STATES.success;
-         //    })
-         //    .catch(() => {
-         //       this.appState = this.STATES.error;
-         //       setTimeout(() => {
-         //          this.appState = this.STATES.normal;
-         //          this.verified = false;
-         //       }, 1000);
-         //    });
+         this.createNode(tree, this.contextId, this.selectedNodeId, Listelength)
+            .then(() => {
+               this.appState = this.STATES.success;
+            })
+            .catch(() => {
+               this.appState = this.STATES.error;
+               setTimeout(() => {
+                  this.appState = this.STATES.normal;
+                  this.verified = false;
+               }, 1000);
+            });
       },
 
       createNode(liste, contextId, nodeId, Listelength) {
