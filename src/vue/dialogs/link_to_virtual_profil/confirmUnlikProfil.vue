@@ -24,6 +24,7 @@ with this file. If not, see
 
 <template>
    <md-dialog
+      class="mdDialogContainer"
       :md-active.sync="showDialog"
       @md-closed="closeDialog(false)"
    >
@@ -74,3 +75,10 @@ export default {
    },
 };
 </script>
+
+<style>
+.mdDialogContainer .md-dialog-container {
+   max-width: 100%;
+   max-height: 100%;
+}
+</style>

@@ -260,3 +260,10 @@ export default {
    overflow: auto;
 } */
 </style>
+
+<style>
+.personalizedDialog .md-dialog-container {
+   max-width: 100%;
+   max-height: 100%;
+}
+</style>
