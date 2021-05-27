@@ -4,13 +4,14 @@ import {
 } from "spinal-env-viewer-context-menu-service";
 import { SpinalGraphService, SPINAL_RELATION_PTR_LST_TYPE } from "spinal-env-viewer-graph-service";
 
-import {
-   spinalPanelManagerService
-} from "spinal-env-viewer-panel-manager-service";
+import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+
+// import spinalNetworkTreeService from "../../services";
+import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
+
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import spinalNetworkTreeService from "../../services";
 
 class ClearAutomateContent extends SpinalContextApp {
    constructor() {
@@ -27,7 +28,8 @@ class ClearAutomateContent extends SpinalContextApp {
       const contextType = option.context.type.get();
       const type = option.selectedNode.type.get();
 
-      if (contextType === spinalNetworkTreeService.constants.CONTEXT_TYPE) return Promise.resolve(true);
+      // if (contextType === spinalNetworkTreeService.constants.CONTEXT_TYPE) return Promise.resolve(true);
+      if (contextType === CONSTANTS.CONTEXT_TYPE) return Promise.resolve(true);
       return Promise.resolve(-1);
    }
 
@@ -47,13 +49,22 @@ class ClearAutomateContent extends SpinalContextApp {
 
 const removeRelation = async (contextId, nodeId) => {
    const realNode = SpinalGraphService.getRealNode(nodeId);
-   if (realNode.hasRelation(spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
+   // if (realNode.hasRelation(spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
+   //    const children = await SpinalGraphService.getChildrenInContext(nodeId, contextId);
+   //    await realNode.removeRelation(spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
+   //    return children.map(el => {
+   //       return removeRelation(contextId, el.id.get());
+   //    })
+   // }
+
+   if (realNode.hasRelation(CONSTANTS.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
       const children = await SpinalGraphService.getChildrenInContext(nodeId, contextId);
-      await realNode.removeRelation(spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
+      await realNode.removeRelation(CONSTANTS.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
       return children.map(el => {
          return removeRelation(contextId, el.id.get());
       })
    }
+
 }
 
 const clearAutomateContent = new ClearAutomateContent();

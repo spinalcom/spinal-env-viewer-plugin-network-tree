@@ -23,94 +23,97 @@ with this file. If not, see
 -->
 
 <template>
-  <div class="devices_container">
-    <div class="devices_div">
-      <div class="name"></div>
-    </div>
-    <div class="devices_div">
-      <div class="name"></div>
-    </div>
-  </div>
+   <div class="devices_container">
+      <div class="devices_div">
+         <div class="name"></div>
+      </div>
+      <div class="devices_div">
+         <div class="name"></div>
+      </div>
+   </div>
 </template>
 
 <script>
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-import { NETWORK_BIMOJECT_RELATION } from "../../services/constants";
+import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 import utilities from "../../../js/utilities";
 
 const _ = require("lodash");
 
 export default {
-  name: "linksDeviceToDevicesTemplate",
-  props: {
-    virtualDeviceContextId: {},
-    virtualDeviceId: {},
-    physicalDeviceContextId: {},
-    physicalDeviceId: {},
-  },
-  data() {
-    return {
-      physicalMap: new Map(),
-      virtualMap: new Map(),
-    };
-  },
-  mounted() {
-    // this.createMapsFunc = _.once(this.createMaps());
-  },
-  methods: {
-    createMaps() {
-      const virtualElementsPromise = utilities.getItemsList(
-        this.virtualDeviceId
-      );
-      const physicalElementsPromise = SpinalGraphService.getChildren(
-        this.physicalDeviceId,
-        [NETWORK_BIMOJECT_RELATION]
-      );
+   name: "linksDeviceToDevicesTemplate",
+   props: {
+      virtualDeviceContextId: {},
+      virtualDeviceId: {},
+      physicalDeviceContextId: {},
+      physicalDeviceId: {},
+   },
+   data() {
+      return {
+         physicalMap: new Map(),
+         virtualMap: new Map(),
+      };
+   },
+   mounted() {
+      // this.createMapsFunc = _.once(this.createMaps());
+   },
+   methods: {
+      createMaps() {
+         const virtualElementsPromise = utilities.getItemsList(
+            this.virtualDeviceId
+         );
+         const physicalElementsPromise = SpinalGraphService.getChildren(
+            this.physicalDeviceId,
+            [CONSTANTS.NETWORK_BIMOJECT_RELATION]
+         );
 
-      return Promise.all([
-        virtualElementsPromise,
-        physicalElementsPromise,
-      ]).then((result) => {
-        const virtualElements = result[0];
-        const physicalElements = result[1].map((el) => el.get());
+         return Promise.all([
+            virtualElementsPromise,
+            physicalElementsPromise,
+         ]).then((result) => {
+            const virtualElements = result[0];
+            const physicalElements = result[1].map((el) => el.get());
 
-        this.physicalMap = this._formatMap(physicalElements, "suffix");
-        this.virtualMap = this._formatMap(virtualElements, "namingConvention");
-      });
-    },
+            this.physicalMap = this._formatMap(physicalElements, "suffix");
+            this.virtualMap = this._formatMap(
+               virtualElements,
+               "namingConvention"
+            );
+         });
+      },
 
-    _formatMap(liste, property) {
-      const map = new Map();
-      for (const iterator of liste) {
-        map.set(iterator[property], iterator);
-      }
+      _formatMap(liste, property) {
+         const map = new Map();
+         for (const iterator of liste) {
+            map.set(iterator[property], iterator);
+         }
 
-      return map;
-    },
-  },
-  watch: {
-    virtualDeviceId() {
-      this.createMaps();
-      // this.createMapsFunc();
-    },
-    physicalDeviceId() {
-      // this.createMapsFunc();
-    },
-  },
+         return map;
+      },
+   },
+   watch: {
+      virtualDeviceId() {
+         this.createMaps();
+         // this.createMapsFunc();
+      },
+      physicalDeviceId() {
+         // this.createMapsFunc();
+      },
+   },
 };
 </script>
 
 <style scoped>
 .devices_container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
+   width: 100%;
+   height: 100%;
+   display: flex;
+   justify-content: space-between;
 }
 
 .devices_container .devices_div {
-  width: 49%;
-  height: 100%;
-  border: 1px solid red;
+   width: 49%;
+   height: 100%;
+   border: 1px solid red;
 }
 </style>

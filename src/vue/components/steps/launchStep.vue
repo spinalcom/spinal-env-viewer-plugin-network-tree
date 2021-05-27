@@ -140,9 +140,15 @@ with this file. If not, see
 
 <script>
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-// import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-import generateAutomateService from "../../../js/generateAutomateService";
-import spinalNetworkTreeService from "../../../services/index";
+// // import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+// import generateAutomateService from "../../../js/generateAutomateService";
+// import spinalNetworkTreeService from "../../../services/index";
+
+import {
+   NetworkTreeService,
+   GenerateNetworkTreeService,
+   CONSTANTS,
+} from "spinal-env-viewer-plugin-network-tree-service";
 
 export default {
    name: "launchGeneration",
@@ -189,21 +195,19 @@ export default {
          this.formatData().then(
             ({ automatesProperties, equipementsProperties }) => {
                // console.log(result);
-               return generateAutomateService
-                  .createTree(
-                     automatesProperties,
-                     equipementsProperties,
-                     this.attribute
-                  )
-                  .then(({ tree, invalids, valids }) => {
-                     this.tree = tree;
-                     this.validItems = valids;
-                     this.invalidItems = invalids;
+               return GenerateNetworkTreeService.createTree(
+                  automatesProperties,
+                  equipementsProperties,
+                  this.attribute
+               ).then(({ tree, invalids, valids }) => {
+                  this.tree = tree;
+                  this.validItems = valids;
+                  this.invalidItems = invalids;
 
-                     this.verified = true;
-                     this.appState = this.STATES.normal;
-                     this.$emit("verified");
-                  });
+                  this.verified = true;
+                  this.appState = this.STATES.normal;
+                  this.$emit("verified");
+               });
 
                // this.automatesVerificationResult = result.automatesProperties;
                // this.equipementsVerificationResult = result.equipementsProperties;
@@ -282,8 +286,7 @@ export default {
                item
             );
 
-            generateAutomateService
-               ._createNodes(contextId, item, parentId)
+            GenerateNetworkTreeService._createNodes(contextId, item, parentId)
                .then(() => {
                   this.percent = Math.floor(
                      (100 * (Listelength - liste.length)) / Listelength
@@ -331,14 +334,21 @@ export default {
             found && found.displayValue ? found.displayValue : "Others";
 
          const children = await SpinalGraphService.getChildren(nodeId, [
-            spinalNetworkTreeService.constants.NETWORK_RELATION,
+            // spinalNetworkTreeService.constants.NETWORK_RELATION,
+            CONSTANTS.NETWORK_RELATION,
          ]);
 
          const parentFound = children.find((el) => el.name.get() == parentName);
 
          if (parentFound) return parentFound.id.get();
 
-         const parent = await spinalNetworkTreeService.addNetwork(
+         // const parent = await spinalNetworkTreeService.addNetwork(
+         //    parentName,
+         //    nodeId,
+         //    contextId
+         // );
+
+         const parent = await NetworkTreeService.addNetwork(
             parentName,
             nodeId,
             contextId
@@ -357,12 +367,12 @@ export default {
 
       formatData() {
          const promises = [
-            generateAutomateService.getElementProperties(
+            GenerateNetworkTreeService.getElementProperties(
                this.automatesObj.items,
                this.automatesObj.attributeName,
                this.namingConvention
             ),
-            generateAutomateService.getElementProperties(
+            GenerateNetworkTreeService.getElementProperties(
                this.equipmentsObj.items,
                this.equipmentsObj.attributeName,
                this.namingConvention
@@ -378,7 +388,9 @@ export default {
       },
 
       selectItems(argItems) {
-         const items = generateAutomateService.classifyDbIdsByModel(argItems);
+         const items = GenerateNetworkTreeService.classifyDbIdsByModel(
+            argItems
+         );
          window.spinal.ForgeViewer.viewer.impl.selector.setAggregateSelection(
             items
          );

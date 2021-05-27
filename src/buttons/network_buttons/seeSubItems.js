@@ -1,7 +1,8 @@
 import { SpinalContextApp, spinalContextMenuService } from "spinal-env-viewer-context-menu-service";
 import { SpinalGraphService, SPINAL_RELATION_PTR_LST_TYPE } from "spinal-env-viewer-graph-service";
 
-import spinalNetworkTreeService from "../../services";
+// import spinalNetworkTreeService from "../../services";
+import { CONSTANTS, NetworkTreeService } from "spinal-env-viewer-plugin-network-tree-service";
 
 const SIDEBAR = "GraphManagerSideBar";
 
@@ -21,12 +22,14 @@ class SeeSubItems extends SpinalContextApp {
 
         const contextType = option.context.type.get();
 
-        if (contextType !== spinalNetworkTreeService.constants.CONTEXT_TYPE) return Promise.resolve(-1);
+        // if (contextType !== spinalNetworkTreeService.constants.CONTEXT_TYPE) return Promise.resolve(-1);
+        if (contextType !== CONSTANTS.CONTEXT_TYPE) return Promise.resolve(-1);
 
         const id = option.selectedNode.id.get();
         const realNode = SpinalGraphService.getRealNode(id);
 
-        if (realNode.hasRelation(spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
+        // if (realNode.hasRelation(spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
+        if (realNode.hasRelation(CONSTANTS.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
             this.buttonCfg.icon = typeof automateWatched.get(id) === "undefined" ? "visibility" : "visibility_off";
             return Promise.resolve(true);
         }
@@ -37,7 +40,8 @@ class SeeSubItems extends SpinalContextApp {
 
     async action(option) {
         const { id, color } = option.selectedNode.get();
-        const children = await spinalNetworkTreeService.getBimObjectsLinked(id);
+        // const children = await spinalNetworkTreeService.getBimObjectsLinked(id);
+        const children = await NetworkTreeService.getBimObjectsLinked(id);
         const res = []
 
         let vector;

@@ -100,13 +100,20 @@
 
 <script>
 import { bimObjectManagerService } from "spinal-env-viewer-bim-manager-service";
-import networkService from "../../../js/network/networkService";
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+
+// import linkAutomateToBmsDeviceUtilities from "../../../js/link_utilities/linkAutomateToBmsDevice";
+
+import { LinkBmsDeviceService } from "spinal-env-viewer-plugin-network-tree-service";
+
+import networkService from "../../../js/network/networkService";
+
 import LinkComponent from "../../components/links/LinkComponent.vue";
 import ConfirmLinkToGTB from "./confirmLinkToGTB.vue";
 import ConfigurationTemplate from "../../components/links/configuration.vue";
-import linkAutomateToBmsDeviceUtilities from "../../../js/link_utilities/linkAutomateToBmsDevice";
-import { SpinalForgeViewer } from "spinal-env-viewer-plugin-forge";
+
+// import { SpinalForgeViewer } from "spinal-env-viewer-plugin-forge";
+
 const lodash = require("lodash");
 
 export default {
@@ -231,12 +238,12 @@ export default {
       createLinkRec(liste, contextId, listeLenth, resolve) {
          const item = liste.shift();
          if (item) {
-            linkAutomateToBmsDeviceUtilities
-               .LinkBmsDeviceToBimDevices(
-                  contextId,
-                  item.profileItem.id,
-                  item.automateItem.id
-               )
+            // linkAutomateToBmsDeviceUtilities
+            LinkBmsDeviceService.LinkBmsDeviceToBimDevices(
+               contextId,
+               item.profileItem.id,
+               item.automateItem.id
+            )
                .then(() => {
                   this.percent = Math.floor(
                      (100 * (listeLenth - liste.length)) / listeLenth

@@ -4,7 +4,10 @@ import {
 } from "spinal-env-viewer-context-menu-service";
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 
-import utilities from "../../js/utilities";
+// import utilities from "../../js/utilities";
+// import spinalNetworkTreeService from "../../services";
+
+import { LinkNetworkTreeService, CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 
 import {
   spinalPanelManagerService
@@ -14,7 +17,6 @@ import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import spinalNetworkTreeService from "../../services";
 const editLinkIcon = require("../../assets/link-edit.svg");
 
 class EditAutomateLink extends SpinalContextApp {
@@ -30,7 +32,8 @@ class EditAutomateLink extends SpinalContextApp {
 
   async isShown(option) {
     const contextType = option.context.type.get();
-    const serviceContextType = spinalNetworkTreeService.constants.CONTEXT_TYPE;
+
+    const serviceContextType = CONSTANTS.CONTEXT_TYPE;
 
     if (contextType !== serviceContextType) {
       return -1;
@@ -38,10 +41,10 @@ class EditAutomateLink extends SpinalContextApp {
 
     const nodeId = option.selectedNode.id.get();
 
-    const profilLinked = await utilities.getProfilLinked(nodeId);
+    const profilLinked = await LinkNetworkTreeService.getProfilLinked(nodeId);
 
     if (typeof profilLinked !== "undefined") {
-      // this.buttonCfg.fontColor = "#FFFFFF"
+
       return true
     };
 
@@ -52,26 +55,25 @@ class EditAutomateLink extends SpinalContextApp {
     let contextId = option.context.id.get();
     let nodeId = option.selectedNode.id.get();
 
-    // if(option.selectedNode.type.get() === BIM_OBJECT_TYPE) {
-    //   automates = [option.selectedNode];
-    // } else {
-    //   automates = await SpinalGraphService.getChildren(nodeId,[spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION])
-    // }
-
-    const data = await utilities.getDeviceAndProfilData(nodeId)
+    // const data = await utilities.getDeviceAndProfilData(nodeId)
+    // const data = await LinkNetworkTreeService.getDeviceAndProfilData(nodeId);
 
 
     spinalPanelManagerService.openPanel("editAutomateLinkDialog", {
-      data,
-      callback: async (res) => {
-        const validPromises = res.valids.map(({ automateItem, profileItem }) => utilities.linkAutomateItemToProfilItem(automateItem.id, profileItem.id));
+      contextId,
+      nodeId,
+      // data,
+      // callback: async (res) => {
+      //   // const validPromises = res.valids.map(({ automateItem, profileItem }) => utilities.linkAutomateItemToProfilItem(automateItem.id, profileItem.id));
+      //   const validPromises = res.valids.map(({ automateItem, profileItem }) => LinkNetworkTreeService.linkAutomateItemToProfilItem(automateItem.id, profileItem.id));
 
-        await Promise.all(validPromises).then((result) => {
-          const invaliPromises = res.invalidAutomateItems.map(el => utilities.unLinkAutomateItemToProfilItem(el.id));
-          return Promise.all(invaliPromises);
-        })
+      //   await Promise.all(validPromises).then(() => {
+      //     // const invaliPromises = res.invalidAutomateItems.map(el => utilities.unLinkAutomateItemToProfilItem(el.id));
+      //     const invaliPromises = res.invalidAutomateItems.map(el => LinkNetworkTreeService.unLinkAutomateItemToProfilItem(el.id));
+      //     return Promise.all(invaliPromises);
+      //   })
 
-      }
+      // }
     })
   }
 

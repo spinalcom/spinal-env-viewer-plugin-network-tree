@@ -51,7 +51,9 @@ with this file. If not, see
 </template>
 
 <script>
-import networkTreeService from "../../../services";
+// import networkTreeService from "../../../services";
+
+import { NetworkTreeService } from "spinal-env-viewer-plugin-network-tree-service";
 
 export default {
    name: "createNetworkDialog",
@@ -80,9 +82,15 @@ export default {
          if (option.closeResult && option.inputValue.trim().length > 0) {
             let name = this.inputValue.trim();
             if (this.createContext) {
-               networkTreeService.createNetworkContext(name);
+               // networkTreeService.createNetworkContext(name);
+               NetworkTreeService.createNetworkContext(name);
             } else {
-               networkTreeService.addNetwork(
+               // networkTreeService.addNetwork(
+               //    name,
+               //    this.selectedNode.id.get(),
+               //    this.context.id.get()
+               // );
+               NetworkTreeService.addNetwork(
                   name,
                   this.selectedNode.id.get(),
                   this.context.id.get()

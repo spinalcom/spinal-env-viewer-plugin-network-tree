@@ -7,9 +7,11 @@ import {
   spinalPanelManagerService
 } from "spinal-env-viewer-panel-manager-service";
 
+// import networkTreeService from "../../services";
+import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 const SIDEBAR = "GraphManagerSideBar";
 
-import networkTreeService from "../../services";
+
 
 
 class TableDetail extends SpinalContextApp {
@@ -27,13 +29,12 @@ class TableDetail extends SpinalContextApp {
 
   isShown(option) {
     let contextType = option.selectedNode.type.get();
-    return contextType === networkTreeService.constants.CONTEXT_TYPE ? Promise
-      .resolve(true) : Promise.resolve(-1);
+    // return contextType === networkTreeService.constants.CONTEXT_TYPE ? Promise.resolve(true) : Promise.resolve(-1);
+    return contextType === CONSTANTS.CONTEXT_TYPE ? Promise.resolve(true) : Promise.resolve(-1);
   }
 
   action(option) {
-    spinalPanelManagerService.openPanel("networkTreeDetailPanel", option
-      .selectedNode.get());
+    spinalPanelManagerService.openPanel("networkTreeDetailPanel", option.selectedNode.get());
   }
 
 }

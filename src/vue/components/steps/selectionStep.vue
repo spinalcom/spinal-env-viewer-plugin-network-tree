@@ -87,7 +87,10 @@ with this file. If not, see
 <script>
 import geographicService from "spinal-env-viewer-context-geographic-service";
 import { bimObjectManagerService } from "spinal-env-viewer-bim-manager-service";
-import generateAutomateService from "../../../js/generateAutomateService";
+// import generateAutomateService from "../../../js/generateAutomateService";
+
+import { GenerateNetworkTreeService } from "spinal-env-viewer-plugin-network-tree-service";
+
 export default {
    name: "selectionStep",
    props: {
@@ -190,18 +193,19 @@ export default {
 
       verifyResult() {
          this.loadAttributeResult = true;
-         generateAutomateService
-            .getElementProperties(this.config.items, this.config.attributeName)
-            .then((result) => {
-               this.validItems = result.validItems;
-               this.invalidItems = result.invalidItems;
-               this.displayResult = true;
-               this.loadAttributeResult = false;
-            });
+         GenerateNetworkTreeService.getElementProperties(
+            this.config.items,
+            this.config.attributeName
+         ).then((result) => {
+            this.validItems = result.validItems;
+            this.invalidItems = result.invalidItems;
+            this.displayResult = true;
+            this.loadAttributeResult = false;
+         });
       },
 
       selectValidItemsOnModel() {
-         const items = generateAutomateService.classifyDbIdsByModel(
+         const items = GenerateNetworkTreeService.classifyDbIdsByModel(
             this.validItems
          );
 
@@ -211,7 +215,7 @@ export default {
       },
 
       selectInvalidItemsOnModel() {
-         const items = generateAutomateService.classifyDbIdsByModel(
+         const items = GenerateNetworkTreeService.classifyDbIdsByModel(
             this.invalidItems
          );
 

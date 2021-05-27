@@ -3,11 +3,11 @@ import "./buttons";
 import "./vue/dialogs";
 import "./vue/panels";
 
-import spinalNetworkTreeService from "../src/services";
+// import spinalNetworkTreeService from "../src/services";
 
 
-export {
-  spinalNetworkTreeService
-}
+// export {
+//   spinalNetworkTreeService
+// }
 
-export default spinalNetworkTreeService;
+// export default spinalNetworkTreeService;

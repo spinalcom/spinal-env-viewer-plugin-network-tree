@@ -117,7 +117,9 @@ import launchGenerationStep from "../components/steps/launchStep.vue";
 import selectionStep from "../components/steps/selectionStep.vue";
 import namingConventionStep from "../components/steps/namingConventionStep.vue";
 
-import { OBJECT_ATTR } from "../../js/attributeConfig";
+import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
+
+// import { OBJECT_ATTR } from "../../js/attributeConfig";
 
 export default {
    name: "heatmapPanel",
@@ -153,7 +155,7 @@ export default {
                isRegex: true,
                text: "",
                flags: [],
-               select: OBJECT_ATTR,
+               select: CONSTANTS.OBJECT_ATTR,
                callback: () => {},
             },
             namingConvention: {

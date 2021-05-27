@@ -1,15 +1,13 @@
-import {
-  SpinalContextApp,
-  spinalContextMenuService
-} from "spinal-env-viewer-context-menu-service";
+import { SpinalContextApp, spinalContextMenuService } from "spinal-env-viewer-context-menu-service";
 
-const {
-  spinalPanelManagerService
-} = require("spinal-env-viewer-panel-manager-service");
+const { spinalPanelManagerService } = require("spinal-env-viewer-panel-manager-service");
+
+// import networkService from "../../services"
+import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import networkService from "../../services"
+
 
 class CreateNetWork extends SpinalContextApp {
   constructor() {
@@ -24,8 +22,8 @@ class CreateNetWork extends SpinalContextApp {
   isShown(option) {
     let contextType = option.context.type.get();
 
-    return Promise.resolve(contextType === networkService.constants
-      .CONTEXT_TYPE ? true : -1);
+    // return Promise.resolve(contextType === networkService.constants.CONTEXT_TYPE ? true : -1);
+    return Promise.resolve(contextType === CONSTANTS.CONTEXT_TYPE ? true : -1);
   }
 
   action(option) {

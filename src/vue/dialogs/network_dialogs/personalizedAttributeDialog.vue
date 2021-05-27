@@ -139,10 +139,11 @@
 </template>
 
 <script>
-import flagsList from "../../../js/flags";
-import { PLC_ATTR, OBJECT_ATTR } from "../../../js/attributeConfig";
-import SpinalCodeMirror from "../../components/code-mirror/SpinalCodeMirror.vue";
+// import { PLC_ATTR, OBJECT_ATTR } from "../../../js/attributeConfig";
+import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 
+import flagsList from "../../../js/flags";
+import SpinalCodeMirror from "../../components/code-mirror/SpinalCodeMirror.vue";
 import functionText from "../../../js/personalized_functions/function";
 
 const slashIcon = require("../../../assets/slash.svg");
@@ -154,8 +155,8 @@ export default {
    data() {
       this.callback;
       this.flagsList = flagsList;
-      this.PCL_ATTR = PLC_ATTR;
-      this.OBJECT_ATTR = OBJECT_ATTR;
+      this.PCL_ATTR = CONSTANTS.PLC_ATTR;
+      this.OBJECT_ATTR = CONSTANTS.OBJECT_ATTR;
 
       this.slashIcon = slashIcon;
 

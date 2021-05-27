@@ -129,11 +129,17 @@ with this file. If not, see
 
 <script>
 import EventBus from "spinal-env-viewer-room-manager/js/event";
-import deviceProfilService from "../../../js/devices_profil_services";
-import linkAutomateToProfilUtilities from "../../../js/link_utilities/linkAutomateToProfil";
+// import deviceProfilService from "../../../js/devices_profil_services";
+
+// import linkAutomateToProfilUtilities from "../../../js/link_utilities/linkAutomateToProfil";
+import {
+   LinkNetworkTreeService,
+   DeviceProfileUtilities,
+} from "spinal-env-viewer-plugin-network-tree-service";
 
 import LinkComponent from "../../components/links/LinkComponent.vue";
 import ResultComponent from "../../components/links/resultComponent.vue";
+
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
@@ -203,12 +209,22 @@ export default {
                contextId: option.contextId,
                automates: automates.map((el) => el.get()),
             };
+
+            this.data = data;
+            this.updateProfils();
+
             this.pageSelected = this.PAGES.selection;
          });
       },
 
       removed(option) {
          this.showDialog = false;
+      },
+
+      closeDialog(closeResult) {
+         if (typeof this.onFinised === "function") {
+            this.onFinised(closeResult);
+         }
       },
 
       getAutomates(contextId, nodeId) {
@@ -234,24 +250,46 @@ export default {
          });
       },
 
-      createLinks() {
+      async createLinks() {
          this.pageSelected = this.PAGES.creation;
+
+         let isError = false;
          const liste = Array.from(this.resultMaps.keys()).map((key) => {
             return [key, this.resultMaps.get(key)];
          });
 
-         this.linkNode(liste, this.deviceSelected, liste.length)
-            .then(() => {
-               this.pageSelected = this.PAGES.success;
-            })
-            .catch((err) => {
-               console.error(err);
-               this.pageSelected = this.PAGES.error;
-            });
+         const listeLength = liste.length;
 
-         // return linkAutomateToProfilUtilities
-         //    .linkNodes(this.resultMaps, this.deviceSelected)
-         //    .then((result) => {
+         while (!isError && liste.length > 0) {
+            const item = liste.shift();
+            if (item) {
+               console.log(item);
+               const [key, value] = item;
+               try {
+                  await LinkNetworkTreeService.linkProfilToDevice(
+                     key,
+                     this.deviceSelected,
+                     value.valids
+                  );
+                  this.percent = Math.floor(
+                     (100 * (listeLength - liste.length)) / listeLength
+                  );
+               } catch (err) {
+                  console.error(err);
+                  isError = true;
+               }
+            }
+         }
+
+         if (isError) {
+            this.pageSelected = this.PAGES.error;
+            return;
+         }
+
+         this.pageSelected = this.PAGES.success;
+
+         // this.linkNode(liste, this.deviceSelected, liste.length)
+         //    .then(() => {
          //       this.pageSelected = this.PAGES.success;
          //    })
          //    .catch((err) => {
@@ -260,65 +298,117 @@ export default {
          //    });
       },
 
-      linkNode(liste, deviceProfilId, listeLength) {
-         return new Promise((resolve, reject) => {
-            this.linkNodeRecur(liste, deviceProfilId, listeLength, resolve);
-         });
-      },
+      // linkNode(liste, deviceProfilId, listeLength) {
+      //    return new Promise((resolve, reject) => {
+      //       this.linkNodeRecur(liste, deviceProfilId, listeLength, resolve);
+      //    });
+      // },
 
-      linkNodeRecur(liste, deviceProfilId, listeLength, resolve) {
-         const item = liste.shift();
-         if (item) {
-            const [key, value] = item;
-            linkAutomateToProfilUtilities
-               .linkProfilToDevice(key, deviceProfilId, value.valids)
-               .then(() => {
-                  this.percent = Math.floor(
-                     (100 * (listeLength - liste.length)) / listeLength
-                  );
+      // linkNodeRecur(liste, deviceProfilId, listeLength, resolve) {
+      //    const item = liste.shift();
+      //    if (item) {
+      //       const [key, value] = item;
+      //       // linkAutomateToProfilUtilities
+      //       LinkNetworkTreeService.linkProfilToDevice(
+      //          key,
+      //          deviceProfilId,
+      //          value.valids
+      //       )
+      //          .then(() => {
+      //             this.percent = Math.floor(
+      //                (100 * (listeLength - liste.length)) / listeLength
+      //             );
 
-                  this.linkNodeRecur(
-                     liste,
-                     deviceProfilId,
-                     listeLength,
-                     resolve
-                  );
-               })
-               .catch(() => {
-                  this.percent = Math.floor(
-                     (100 * (listeLength - liste.length)) / listeLength
-                  );
+      //             this.linkNodeRecur(
+      //                liste,
+      //                deviceProfilId,
+      //                listeLength,
+      //                resolve
+      //             );
+      //          })
+      //          .catch(() => {
+      //             this.percent = Math.floor(
+      //                (100 * (listeLength - liste.length)) / listeLength
+      //             );
 
-                  this.linkNodeRecur(
-                     liste,
-                     deviceProfilId,
-                     listeLength,
-                     resolve
-                  );
-               });
-         } else {
-            resolve(true);
-         }
-      },
-
-      closeDialog(closeResult) {
-         if (typeof this.onFinised === "function") {
-            this.onFinised(closeResult);
-         }
-      },
+      //             this.linkNodeRecur(
+      //                liste,
+      //                deviceProfilId,
+      //                listeLength,
+      //                resolve
+      //             );
+      //          });
+      //    } else {
+      //       resolve(true);
+      //    }
+      // },
 
       getAllData() {
-         return deviceProfilService
-            .getDeviceContextTreeStructure()
-            .then((result) => {
-               this.data = result;
-               this.updateProfils();
-               return;
-            });
+         // return deviceProfilService
+         return DeviceProfileUtilities.getDeviceContextTreeStructure();
+         // .then(
+         //    (result) => {
+         //       this.data = result;
+         //       this.updateProfils();
+         //       return;
+         //    }
+         // );
       },
 
       disabled() {
          return !(this.contextSelected && this.deviceSelected);
+      },
+
+      /* Change Step */
+
+      goToPreviousStep() {
+         this.pageSelected = this.PAGES.selection;
+      },
+
+      goToNext() {
+         this.pageSelected = this.PAGES.loading;
+         const virtualItems = this.getItemsList(this.deviceSelected);
+         return this.createMaps(virtualItems)
+            .then(() => {
+               this.pageSelected = this.PAGES.result;
+            })
+            .catch((err) => {
+               this.pageSelected = this.PAGES.error;
+            });
+      },
+
+      createMaps(virtualItems) {
+         // return linkAutomateToProfilUtilities
+         console.log(this.physicalParams.automates, virtualItems);
+
+         return LinkNetworkTreeService.createMaps(
+            this.physicalParams.automates,
+            virtualItems
+         ).then((resultMap) => {
+            this.resultMaps = resultMap;
+         });
+      },
+
+      /** */
+      editAutomateLinks(res) {
+         const keysIterator = this.resultMaps.keys();
+         let processing = true;
+         let next;
+
+         do {
+            next = keysIterator.next().value;
+            if (typeof next === "undefined") {
+               processing = false;
+            } else if (next === res.automateId) {
+               // console.log(next, res.automateId);
+               this.resultMaps.set(next, res.value);
+               // console.log(this.resultMaps);
+               this.$forceUpdate();
+               // const reference = this.$refs[`result-${res.automateId}`][0];
+               // reference.forceRerender();
+               processing = false;
+            }
+         } while (processing);
       },
 
       getItemsList(deviceId) {
@@ -354,54 +444,6 @@ export default {
             let val = this.profils.find((el) => el.id === this.profilSelected);
             if (val) this.devices = val.devices;
          }
-      },
-
-      /* Change Step */
-
-      goToPreviousStep() {
-         this.pageSelected = this.PAGES.selection;
-      },
-
-      goToNext() {
-         this.pageSelected = this.PAGES.loading;
-         const virtualItems = this.getItemsList(this.deviceSelected);
-         return this.createMaps(virtualItems)
-            .then(() => {
-               this.pageSelected = this.PAGES.result;
-            })
-            .catch((err) => {
-               this.pageSelected = this.PAGES.error;
-            });
-      },
-
-      createMaps(virtualItems) {
-         return linkAutomateToProfilUtilities
-            .createMaps(this.physicalParams.automates, virtualItems)
-            .then((resultMap) => {
-               this.resultMaps = resultMap;
-            });
-      },
-
-      /** */
-      editAutomateLinks(res) {
-         const keysIterator = this.resultMaps.keys();
-         let processing = true;
-         let next;
-
-         do {
-            next = keysIterator.next().value;
-            if (typeof next === "undefined") {
-               processing = false;
-            } else if (next === res.automateId) {
-               // console.log(next, res.automateId);
-               this.resultMaps.set(next, res.value);
-               // console.log(this.resultMaps);
-               this.$forceUpdate();
-               // const reference = this.$refs[`result-${res.automateId}`][0];
-               // reference.forceRerender();
-               processing = false;
-            }
-         } while (processing);
       },
    },
    computed: {

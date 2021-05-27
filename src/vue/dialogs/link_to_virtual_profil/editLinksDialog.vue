@@ -32,10 +32,18 @@ with this file. If not, see
 
       <md-dialog-content>
          <edit-link
+            v-if="!success"
             :data="data"
             :rightTitle="'Profil Items'"
             :leftTitle="'Automate Items'"
          ></edit-link>
+
+         <div
+            class="centered"
+            v-else
+         >
+            <md-icon class="md-size-5x">done</md-icon>
+         </div>
       </md-dialog-content>
 
       <md-dialog-actions>
@@ -46,7 +54,8 @@ with this file. If not, see
 
          <md-button
             class="md-primary"
-            @click="closeDialog(true)"
+            :disabled="success"
+            @click="editLink"
          >Save</md-button>
       </md-dialog-actions>
    </md-dialog>
@@ -54,6 +63,11 @@ with this file. If not, see
 
 
 <script>
+import {
+   LinkNetworkTreeService,
+   CONSTANTS,
+} from "spinal-env-viewer-plugin-network-tree-service";
+
 import editLinkContent from "../../components/links/editLinks.vue";
 
 export default {
@@ -66,21 +80,60 @@ export default {
       this.callback;
 
       return {
+         success: false,
          showDialog: true,
          data: undefined,
       };
    },
    methods: {
-      opened(option) {
-         this.data = JSON.parse(JSON.stringify(option.data));
-         this.callback = option.callback;
+      async opened(option) {
+         // this.data = JSON.parse(JSON.stringify(option.data));
+         this.data = await LinkNetworkTreeService.getDeviceAndProfilData(
+            option.nodeId
+         );
+         // this.callback = option.callback;
       },
-      removed(option) {
+
+      async editLink() {
+         const validPromises = this.data.valids.map(
+            ({ automateItem, profileItem }) =>
+               LinkNetworkTreeService.linkAutomateItemToProfilItem(
+                  automateItem.id,
+                  profileItem.id
+               )
+         );
+
+         await Promise.all(validPromises);
+
+         const invaliPromises = this.data.invalidAutomateItems.map((el) =>
+            LinkNetworkTreeService.unLinkAutomateItemToProfilItem(el.id)
+         );
+         await Promise.all(invaliPromises);
+
+         this.success = true;
+      },
+
+      async removed(option) {
          if (option) {
-            if (typeof this.callback === "function") this.callback(this.data);
+            // // if (typeof this.callback === "function") this.callback(this.data);
+            // const validPromises = this.data.valids.map(
+            //    ({ automateItem, profileItem }) =>
+            //       LinkNetworkTreeService.linkAutomateItemToProfilItem(
+            //          automateItem.id,
+            //          profileItem.id
+            //       )
+            // );
+            // await Promise.all(validPromises).then(() => {
+            //    const invaliPromises = res.invalidAutomateItems.map((el) =>
+            //       LinkNetworkTreeService.unLinkAutomateItemToProfilItem(el.id)
+            //    );
+            //    return Promise.all(invaliPromises);
+            // });
          }
+
          this.showDialog = false;
       },
+
       closeDialog(closeResult) {
          if (typeof this.onFinised === "function") {
             this.onFinised(closeResult);
@@ -108,6 +161,14 @@ export default {
 .linkerDialogsContent {
    width: 100%;
    height: 100%;
+}
+
+.centered {
+   width: 100%;
+   height: 100%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
 }
 </style>
 

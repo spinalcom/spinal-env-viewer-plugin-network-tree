@@ -5,7 +5,8 @@ import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
 const SIDEBAR = "GraphManagerSideBar";
 
-import spinalNetworkTreeService from "../../services";
+// import spinalNetworkTreeService from "../../services";
+import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 
 class LinkToGTBNetworkBtn extends SpinalContextApp {
    constructor() {
@@ -23,8 +24,7 @@ class LinkToGTBNetworkBtn extends SpinalContextApp {
       const contextType = option.context.type.get();
 
       // const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
-      if (contextType !== spinalNetworkTreeService.constants.CONTEXT_TYPE || type === contextType || !nodeIsAutomate(option.selectedNode)) return Promise.resolve(-1);
-
+      if (contextType !== CONSTANTS.CONTEXT_TYPE || type === contextType || !nodeIsAutomate(option.selectedNode)) return Promise.resolve(-1);
 
 
       return Promise.resolve(true);

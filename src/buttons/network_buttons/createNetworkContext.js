@@ -5,7 +5,7 @@ import {
 
 const {
   spinalPanelManagerService,
-  
+
 } = require("spinal-env-viewer-panel-manager-service");
 
 const HEADERBAR = "GraphManagerTopBar";
