@@ -147,6 +147,7 @@ import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 import {
    NetworkTreeService,
    GenerateNetworkTreeService,
+   AttributesUtilities,
    CONSTANTS,
 } from "spinal-env-viewer-plugin-network-tree-service";
 
@@ -194,7 +195,6 @@ export default {
          this.appState = this.STATES.loading;
          this.formatData().then(
             ({ automatesProperties, equipementsProperties }) => {
-               // console.log(result);
                return GenerateNetworkTreeService.createTree(
                   automatesProperties,
                   equipementsProperties,
@@ -219,105 +219,105 @@ export default {
       },
 
       async launchGeneration() {
-         // this.appState = this.STATES.loading;
-         // return generateAutomateService
-         //    .createTreeNodes(
-         //       this.contextId,
-         //       this.selectedNodeId,
-         //       this.tree,
-         //       this.dontCreateEmptyAutomate,
-         //    )
-         //    .then((result) => {
-         //       this.appState = this.STATES.success;
-         //       // setTimeout(() => {
-         //       //   this.appState = this.STATES.normal;
-         //       //   this.verified = false;
-         //       // }, 1000);
-         //    })
-         //    .catch((err) => {
-         //       console.error(err);
-         //       this.appState = this.STATES.error;
-         //       setTimeout(() => {
-         //          this.appState = this.STATES.normal;
-         //          this.verified = false;
-         //       }, 1000);
-         //    });
-
          this.appState = this.STATES.creation;
-         let tree = this.tree;
+         let tree = [...this.tree];
 
          if (this.dontCreateEmptyAutomate) {
             tree = this.tree.filter((el) => el.children.length > 0);
          }
 
          const Listelength = tree.length;
+         let isError = false;
 
-         this.createNode(tree, this.contextId, this.selectedNodeId, Listelength)
-            .then(() => {
-               this.appState = this.STATES.success;
-            })
-            .catch(() => {
-               this.appState = this.STATES.error;
-               setTimeout(() => {
-                  this.appState = this.STATES.normal;
-                  this.verified = false;
-               }, 1000);
-            });
-      },
+         while (!isError && tree.length > 0) {
+            const item = tree.shift();
+            try {
+               if (item) {
+                  const parentId = await this.getOrCreateParentId(
+                     this.contextId,
+                     this.selectedNodeId,
+                     item
+                  );
 
-      createNode(liste, contextId, nodeId, Listelength) {
-         return new Promise((resolve, reject) => {
-            this.createNodeRecur(
-               liste,
-               contextId,
-               nodeId,
-               Listelength,
-               resolve
-            );
-         });
-      },
+                  console.log("parentId", item);
 
-      async createNodeRecur(liste, contextId, nodeId, Listelength, resolve) {
-         const item = liste.shift();
-         if (item) {
-            const parentId = await this.getOrCreateParentId(
-               contextId,
-               nodeId,
-               item
-            );
+                  await GenerateNetworkTreeService._createNodes(
+                     this.contextId,
+                     item,
+                     parentId
+                  );
 
-            GenerateNetworkTreeService._createNodes(contextId, item, parentId)
-               .then(() => {
                   this.percent = Math.floor(
-                     (100 * (Listelength - liste.length)) / Listelength
+                     (100 * (Listelength - tree.length)) / Listelength
                   );
-
-                  this.createNodeRecur(
-                     liste,
-                     contextId,
-                     nodeId,
-                     Listelength,
-                     resolve
-                  );
-               })
-               .catch((err) => {
-                  console.error(err);
-                  this.percent = Math.floor(
-                     (100 * (Listelength - liste.length)) / Listelength
-                  );
-
-                  this.createNodeRecur(
-                     liste,
-                     contextId,
-                     nodeId,
-                     Listelength,
-                     resolve
-                  );
-               });
-         } else {
-            resolve(true);
+               }
+            } catch (error) {
+               console.error(error);
+               isError = true;
+            }
          }
+
+         if (isError) {
+            this.appState = this.STATES.error;
+            return;
+         }
+
+         this.appState = this.STATES.success;
       },
+
+      // createNode(liste, contextId, nodeId, Listelength) {
+      //    return new Promise((resolve, reject) => {
+      //       this.createNodeRecur(
+      //          liste,
+      //          contextId,
+      //          nodeId,
+      //          Listelength,
+      //          resolve
+      //       );
+      //    });
+      // },
+
+      // async createNodeRecur(liste, contextId, nodeId, Listelength, resolve) {
+      //    const item = liste.shift();
+      //    if (item) {
+      //       const parentId = await this.getOrCreateParentId(
+      //          contextId,
+      //          nodeId,
+      //          item
+      //       );
+
+      //       GenerateNetworkTreeService._createNodes(contextId, item, parentId)
+      //          .then(() => {
+      //             this.percent = Math.floor(
+      //                (100 * (Listelength - liste.length)) / Listelength
+      //             );
+
+      //             this.createNodeRecur(
+      //                liste,
+      //                contextId,
+      //                nodeId,
+      //                Listelength,
+      //                resolve
+      //             );
+      //          })
+      //          .catch((err) => {
+      //             console.error(err);
+      //             this.percent = Math.floor(
+      //                (100 * (Listelength - liste.length)) / Listelength
+      //             );
+
+      //             this.createNodeRecur(
+      //                liste,
+      //                contextId,
+      //                nodeId,
+      //                Listelength,
+      //                resolve
+      //             );
+      //          });
+      //    } else {
+      //       resolve(true);
+      //    }
+      // },
 
       async getOrCreateParentId(contextId, nodeId, item) {
          if (!this.classify.class) {
@@ -326,8 +326,13 @@ export default {
 
          const val = this.classify.by;
 
-         const found = item.properties.find(
-            (el) => el.attributeName == val || el.displayName == val
+         // const found = item.properties.find(
+         //    (el) => el.attributeName == val || el.displayName == val
+         // );
+         const found = await AttributesUtilities.findAttribute(
+            item.model,
+            item.dbId,
+            val
          );
 
          const parentName =
@@ -447,7 +452,7 @@ export default {
    align-items: center;
 }
 
-.content
+/* .content
    .buttons
    .content-items
    .content-item.content-item.classifyContent
@@ -459,7 +464,7 @@ export default {
    .content-items
    .content-item.content-item.classifyContent
    .input {
-}
+} */
 
 .state {
    width: 100%;

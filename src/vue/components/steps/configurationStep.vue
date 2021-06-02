@@ -171,13 +171,13 @@ export default {
 
 <style>
 ._container .content .radios .md-list-item-content > .md-checkbox:first-child,
-.md-list-item-content > .md-radio:first-child {
+._container .content .md-list-item-content > .md-radio:first-child {
    width: 100%;
    margin-right: 0px;
 }
 
 ._container .content .radios .md-list-item-content > .md-checkbox:first-child,
-.md-list-item-content > .md-radio .md-radio-label {
+._container .content .md-list-item-content > .md-radio .md-radio-label {
    width: calc(100% - 60px);
    overflow: hidden;
    text-overflow: ellipsis;
