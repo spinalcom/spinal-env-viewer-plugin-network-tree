@@ -234,7 +234,7 @@ export default {
             );
           } catch (error) {
             // console.error(error);
-            isError = true;
+            // isError = true;
           }
         }
       }
