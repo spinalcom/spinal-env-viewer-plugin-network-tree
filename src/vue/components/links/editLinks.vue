@@ -161,39 +161,6 @@ export default {
 
       this.automateItemSelected = undefined;
       this.profileItemSelected = undefined;
-
-      // let automateItemFound;
-      // let profileItemFound;
-
-      // let automateIndice = this.data.invalidAutomateItems.findIndex(
-      //   (el) => el.id === this.automateItemSelected
-      // );
-
-      // if (automateIndice !== -1)
-      //   automateItemFound = this.data.invalidAutomateItems[automateIndice];
-
-      // let profileIndice = this.data.invalidProfileItems.findIndex(
-      //   (el) => el.id === this.profileItemSelected
-      // );
-
-      // if (profileIndice !== -1)
-      //   profileItemFound = this.data.invalidProfileItems[profileIndice];
-
-      // if (automateItemFound && profileItemFound) {
-      //   this.data.valids = [
-      //     {
-      //       automateItem: automateItemFound,
-      //       profileItem: profileItemFound,
-      //     },
-      //     ...this.data.valids,
-      //   ];
-
-      //   this.data.invalidProfileItems.splice(automateIndice, 1);
-      //   this.data.invalidAutomateItems.splice(profileIndice, 1);
-
-      //   this.automateItemSelected = undefined;
-      //   this.profileItemSelected = undefined;
-      // }
     },
 
     unLinkItems(automateItemId, profileItemId) {
@@ -208,25 +175,6 @@ export default {
         automateItemId,
         profileItemId
       );
-
-      // let indice = this.data.valids.findIndex(
-      //   (item) =>
-      //     item.automateItem.id === automateItemId &&
-      //     item.profileItem.id === profileItemId
-      // );
-      // if (indice == -1) return;
-      // const found = this.data.valids[indice];
-      // if (found) {
-      //   this.data.invalidAutomateItems = [
-      //     found.automateItem,
-      //     ...this.data.invalidAutomateItems,
-      //   ];
-      //   this.data.invalidProfileItems = [
-      //     found.profileItem,
-      //     ...this.data.invalidProfileItems,
-      //   ];
-      //   this.data.valids.splice(indice, 1);
-      // }
     },
 
     disableLink() {

@@ -121,7 +121,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .mdDialogContainer {
   width: 500px;
   height: 500px;

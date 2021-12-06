@@ -70,8 +70,6 @@ export default {
         data: this.results,
         nodeId: this.results.automate.id,
         callback: (dataEdited) => {
-          // this.results = dataEdited;
-
           this.$emit("edit", {
             automateId: this.results.automate.id,
             value: dataEdited,

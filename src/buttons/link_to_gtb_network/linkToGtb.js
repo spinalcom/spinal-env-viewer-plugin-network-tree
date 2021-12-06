@@ -1,4 +1,7 @@
-import { SpinalContextApp, spinalContextMenuService } from "spinal-env-viewer-context-menu-service";
+import {
+  SpinalContextApp,
+  spinalContextMenuService,
+} from "spinal-env-viewer-context-menu-service";
 
 import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
 import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
@@ -9,58 +12,55 @@ const SIDEBAR = "GraphManagerSideBar";
 import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 
 class LinkToGTBNetworkBtn extends SpinalContextApp {
-   constructor() {
-      super("link automate to BMS Devices",
-         "link to BMS network Devices", {
-         icon: "settings_input_antenna",
-         icon_type: "in",
-         backgroundColor: "#FF0000",
-         fontColor: "#FFFFFF"
-      })
-   }
+  constructor() {
+    super("link automate to BMS Devices", "link to BMS network Devices", {
+      icon: "settings_input_antenna",
+      icon_type: "in",
+      backgroundColor: "#FF0000",
+      fontColor: "#FFFFFF",
+    });
+  }
 
-   isShown(option) {
-      const type = option.selectedNode.type.get();
-      const contextType = option.context.type.get();
+  isShown(option) {
+    const type = option.selectedNode.type.get();
+    const contextType = option.context.type.get();
 
-      // const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
-      if (contextType !== CONSTANTS.CONTEXT_TYPE || type === contextType || !nodeIsAutomate(option.selectedNode)) return Promise.resolve(-1);
+    // const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
+    if (contextType !== CONSTANTS.CONTEXT_TYPE) return Promise.resolve(-1);
 
+    if (type === BIM_OBJECT_TYPE && !nodeIsAutomate(Option.selectedNode))
+      return Promise.resolve(-1);
 
-      return Promise.resolve(true);
-   }
+    return Promise.resolve(true);
+  }
 
-   async action(option) {
-      let contextId = option.context.id.get();
-      let nodeId = option.selectedNode.id.get();
-      const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
+  async action(option) {
+    let contextId = option.context.id.get();
+    let nodeId = option.selectedNode.id.get();
+    // const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
 
-      //   if (option.selectedNode.type.get() === BIM_OBJECT_TYPE) {
-      //     automates = [option.selectedNode];
-      //   } else {
-      //     automates = await SpinalGraphService.getChildren(nodeId, [spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION])
-      //   }
+    //   if (option.selectedNode.type.get() === BIM_OBJECT_TYPE) {
+    //     automates = [option.selectedNode];
+    //   } else {
+    //     automates = await SpinalGraphService.getChildren(nodeId, [spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION])
+    //   }
 
-      spinalPanelManagerService.openPanel("linkToGtbDialog", {
-         // automates
-         nodeId,
-         contextId,
-         // isAutomate: isAutomate || false
-      })
-   }
-
+    spinalPanelManagerService.openPanel("linkToGtbDialog", {
+      // automates
+      nodeId,
+      contextId,
+      // isAutomate: isAutomate || false
+    });
+  }
 }
-
 
 const nodeIsAutomate = (selectedNode) => {
-   const type = selectedNode.type.get();
-   if (type === BIM_OBJECT_TYPE) {
-      return selectedNode.isAutomate && selectedNode.isAutomate.get();
-   }
-   return true;
-}
-
-
+  const type = selectedNode.type.get();
+  if (type === BIM_OBJECT_TYPE) {
+    return selectedNode.isAutomate && selectedNode.isAutomate.get();
+  }
+  return false;
+};
 
 const linkToGTBNetworkBtn = new LinkToGTBNetworkBtn();
 

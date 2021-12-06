@@ -102,7 +102,7 @@ with this file. If not, see
 <script>
 import { bimObjectManagerService } from "spinal-env-viewer-bim-manager-service";
 import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-
+import linkBimToBmsControllers from "../../../js/controllers/links/linkBimToBmsControllers";
 // import linkAutomateToBmsDeviceUtilities from "../../../js/link_utilities/linkAutomateToBmsDevice";
 
 import {
@@ -142,7 +142,6 @@ export default {
     };
 
     this.bimDevices = [];
-    // this.bimDevices = [];
 
     this.contextId;
     this.nodeId;
@@ -186,19 +185,30 @@ export default {
       this.nodeId = option.nodeId;
       this.isAutomate = option.isAutomate;
 
-      this.getAllData()
-        .then(async () => {
+      this.loadData()
+        .then((result) => {
+          this.updateNetworks();
           this.title = "Select context, subnetwork or the bms device";
-          this.bimDevices = await this._getAutomates(
-            this.nodeId,
-            this.contextId,
-            this.isAutomate
-          ).then((result) => result.map((el) => el.get()));
           this.pageSelected = this.PAGES.selection;
         })
         .catch((err) => {
+          console.error(err);
           this.pageSelected = this.PAGES.error;
         });
+
+      // this.getDeviceContextTreeStructure()
+      //   .then(async () => {
+      //     this.title = "Select context, subnetwork or the bms device";
+      //     this.bimDevices = await this._getAutomates(
+      //       this.nodeId,
+      //       this.contextId,
+      //       this.isAutomate
+      //     );
+      //     this.pageSelected = this.PAGES.selection;
+      //   })
+      //   .catch((err) => {
+      //     this.pageSelected = this.PAGES.error;
+      //   });
     },
 
     removed(save) {
@@ -215,117 +225,91 @@ export default {
 
     async createLink() {
       this.pageSelected = this.PAGES.creation;
-      const liste = [...this.result.valids];
-      const listeLength = liste.length;
-      let isError = false;
+      return linkBimToBmsControllers
+        .createLinkBetweenBimAndBms(
+          this.contextSelected,
+          this.result.valids,
+          this.percent
+        )
+        .then(() => {
+          this.pageSelected = this.PAGES.success;
+        })
+        .catch((err) => {
+          console.error(err);
+          this.pageSelected = this.PAGES.error;
+        });
+      // const liste = this.result.valids;
+      // const listeLength = liste.length;
+      // let isError = false;
+      // let counter = 0;
 
-      while (!isError && liste.length > 0) {
-        const item = liste.shift();
-        if (item) {
-          try {
-            await LinkBmsDeviceService.LinkBmsDeviceToBimDevices(
-              this.contextSelected,
-              item.profileItem.id,
-              item.automateItem.id
-            );
+      // while (!isError && listeLength > counter) {
+      //   const item = liste[counter];
+      //   if (item) {
+      //     try {
+      //       await LinkBmsDeviceService.LinkBmsDeviceToBimDevices(
+      //         this.contextSelected,
+      //         item.profileItem.id,
+      //         item.automateItem.id
+      //       );
 
-            this.percent = Math.floor(
-              (100 * (listeLength - liste.length)) / listeLength
-            );
-          } catch (error) {
-            // console.error(error);
-            // isError = true;
-          }
-        }
-      }
+      //       counter++;
 
-      if (isError) {
-        this.pageSelected = this.PAGES.error;
-        return;
-      }
+      //       this.percent = Math.floor((100 * counter) / listeLength);
+      //     } catch (error) {
+      //       counter++;
+      //       // console.error(error);
+      //       // isError = true;
+      //     }
+      //   }
+      // }
 
-      this.pageSelected = this.PAGES.success;
-
-      // this.createLinkProm(liste, this.contextSelected, liste.length)
-      //    .then(() => {
-      //       this.pageSelected = this.PAGES.success;
-      //    })
-      //    .catch((err) => {
-      //       console.error(err);
-      //       this.pageSelected = this.PAGES.error;
-      //    });
+      // if (isError) {
+      //   this.pageSelected = this.PAGES.error;
+      //   return;
+      // }
     },
 
-    // createLinkProm(liste, contextId, listeLenth) {
-    //    // const promises = this.result.valids.map((el) => {
-    //    //    return linkAutomateToBmsDeviceUtilities.LinkBmsDeviceToBimDevices(
-    //    //       this.contextSelected,
-    //    //       el.profileItem.id,
-    //    //       el.automateItem.id
-    //    //    );
-    //    // });
-
-    //    // return Promise.all(promises)
-    //    //    .then(() => {
-    //    //       this.pageSelected = this.PAGES.success;
-    //    //    })
-    //    //    .catch((err) => {
-    //    //       console.error(err);
-    //    //       this.pageSelected = this.PAGES.error;
-    //    //    });
-
-    //    return new Promise((resolve, reject) => {
-    //       this.createLinkRec(liste, contextId, listeLenth, resolve);
-    //    });
-    // },
-
-    // createLinkRec(liste, contextId, listeLenth, resolve) {
-    //    const item = liste.shift();
-    //    if (item) {
-    //       // linkAutomateToBmsDeviceUtilities
-    //       LinkBmsDeviceService.LinkBmsDeviceToBimDevices(
-    //          contextId,
-    //          item.profileItem.id,
-    //          item.automateItem.id
-    //       )
-    //          .then(() => {
-    //             this.percent = Math.floor(
-    //                (100 * (listeLenth - liste.length)) / listeLenth
-    //             );
-    //             this.createLinkRec(liste, contextId, listeLenth, resolve);
-    //          })
-    //          .catch((err) => {
-    //             this.percent = Math.floor(
-    //                (100 * (listeLenth - liste.length)) / listeLenth
-    //             );
-    //             this.createLinkRec(liste, contextId, listeLenth, resolve);
-    //          });
-    //    } else {
-    //       resolve(true);
-    //    }
-    // },
-
-    _getAutomates(selectionNodeId, contextId) {
-      return SpinalGraphService.findInContext(
-        selectionNodeId,
-        contextId,
-        (node) => {
-          if (node.info.isAutomate && node.info.isAutomate.get()) {
-            SpinalGraphService._addNode(node);
-            return true;
-          }
-
-          return false;
+    loadData() {
+      const bmsTreeProm =
+        linkBimToBmsControllers.getBmsDevicesContextTreeStructure();
+      const automateBimsProm = linkBimToBmsControllers.getAutomateBims(
+        this.nodeId,
+        this.contextId
+      );
+      return Promise.all([bmsTreeProm, automateBimsProm]).then(
+        ([data, automatesBims]) => {
+          this.data = data;
+          this.bimDevices = automatesBims;
         }
       );
     },
 
-    getAllData() {
-      return networkService.getDeviceContextTreeStructure().then((result) => {
-        this.data = result;
-        this.updateNetworks();
-      });
-    },
+    // _getAutomates(selectionNodeId, contextId) {
+    //   return SpinalGraphService.findInContext(
+    //     selectionNodeId,
+    //     contextId,
+    //     (node) => {
+    //       if (node.info.isAutomate && node.info.isAutomate.get()) {
+    //         SpinalGraphService._addNode(node);
+    //         return true;
+    //       }
+
+    //       return false;
+    //     }
+    //   ).then((result) => {
+    //     return result.map((el) => el.get());
+    //   });
+    // },
+
+    // getDeviceContextTreeStructure() {
+    //   return linkBimToBmsControllers
+    //     .getBmsDevicesContextTreeStructure()
+    //     .then((result) => {
+    //       this.data = result;
+    //       this.updateNetworks();
+    //     });
+    // },
 
     goToNext() {
       const currentPage = this.pageSelected;
@@ -333,23 +317,7 @@ export default {
 
       switch (currentPage) {
         case this.PAGES.selection:
-          // if (!this.isAutomate) {
           this._goToConfiguration();
-          // } else {
-          // linkAutomateToBmsDeviceUtilities
-          //    .LinkBmsDeviceToBimDevices(
-          //       this.contextSelected,
-          //       this.deviceSelected,
-          //       this.nodeId
-          //    )
-          //    .then(() => {
-          //       this.pageSelected = this.PAGES.success;
-          //    })
-          //    .catch((err) => {
-          //       console.error(err);
-          //       this.pageSelected = this.PAGES.error;
-          //    });
-          // }
           break;
         case this.PAGES.configuration:
           this._getResult().catch((error) => {
@@ -387,223 +355,133 @@ export default {
 
     async _getResult() {
       this.title = "Edit Link";
-      const bmsDevices = await this._getBmsDevicesProperties(
-        this.configuration.bmsData.property
-      );
 
-      const bimDevices = await this.getElementProperties(
-        this.bimDevices,
-        this.configuration.bimData.property
-      );
+      // const bmsDevices = await this._getBmsDevicesProperties(
+      //   this.configuration.bmsData.property
+      // );
 
-      const res = {
-        valids: [],
-        invalidAutomateItems: [...bimDevices.invalidItems],
-        invalidProfileItems: [],
+      // const bimDevices = await this.getElementProperties(
+      //   this.bimDevices,
+      //   this.configuration.bimData.property
+      // );
+
+      const bmsAttributeName = this.configuration.bmsData.property;
+      const bimAttributeName = this.configuration.bimData.property;
+      const listObj = {
+        devices: this.devices,
+        networks: this.networks,
+        tree: this.data,
       };
 
-      for (const bim of bimDevices.validItems) {
-        let index;
-
-        const bimPropValue = this._formatBimProperty(bim);
-
-        const found = bmsDevices.find((el, i) => {
-          if (el.property) {
-            const bmsPropValue = this._formatBmsProperty(el);
-            console.log(bimPropValue, bmsPropValue);
-            if (bmsPropValue == bimPropValue) {
-              index = i;
-              return true;
-            }
-          }
-
-          return false;
+      linkBimToBmsControllers
+        .getLinkResultBetweenBimAndBms(
+          bmsAttributeName,
+          this.contextSelected,
+          this.networkSelected,
+          this.deviceSelected,
+          listObj,
+          this.bimDevices,
+          bimAttributeName,
+          this.configuration
+        )
+        .then((res) => {
+          this.pageSelected = this.PAGES.result;
+          this.result = res;
+        })
+        .catch((err) => {
+          console.error(err);
+          this.pageSelected = this.PAGES.err;
         });
-
-        if (found) {
-          bmsDevices.splice(index, 1);
-          res.valids.push({ automateItem: bim, profileItem: found });
-        } else {
-          res.invalidAutomateItems.push(bim);
-        }
-      }
-
-      res.invalidProfileItems = bmsDevices;
-      this.pageSelected = this.PAGES.result;
-
-      this.result = res;
     },
 
-    _getBmsDevicesProperties(attributeName) {
-      const devices = this._getBmsDevices();
-      const promises = devices.map(async (el) => {
-        el.property = await AttributesUtilities.findSpinalAttributeById(
-          el.id,
-          attributeName
-        );
-        return el;
-      });
+    // _getBmsDevicesProperties(attributeName) {
+    //   const devices = this._getBmsDevices();
+    //   return linkBimToBmsControllers._getBmsDevicesProperties(
+    //     attributeName,
+    //     devices
+    //   );
+    // },
 
-      return Promise.all(promises);
-    },
+    // _getBmsDevices() {
+    //   if (typeof this.deviceSelected !== "undefined") {
+    //     return this.devices.filter((el) => el.id === this.deviceSelected);
+    //   } else if (typeof this.networkSelected !== "undefined") {
+    //     const found = this.networks.find(
+    //       (el) => el.id === this.networkSelected
+    //     );
+    //     return found && found.devices ? found.devices : [];
+    //   } else if (typeof this.contextSelected !== "undefined") {
+    //     const devices = [];
+    //     const found = this.data.find((el) => el.id === this.contextSelected);
 
-    _getBmsDevices() {
-      if (typeof this.deviceSelected !== "undefined") {
-        return this.devices.filter((el) => el.id === this.deviceSelected);
-      } else if (typeof this.networkSelected !== "undefined") {
-        const found = this.networks.find(
-          (el) => el.id === this.networkSelected
-        );
-        return found && found.devices ? found.devices : [];
-      } else if (typeof this.contextSelected !== "undefined") {
-        const devices = [];
-        const found = this.data.find((el) => el.id === this.contextSelected);
+    //     if (found && found.networks) {
+    //       for (const network of found.networks) {
+    //         if (network.devices) {
+    //           devices.push(...network.devices);
+    //         }
+    //       }
+    //     }
 
-        if (found && found.networks) {
-          for (const network of found.networks) {
-            if (network.devices) {
-              devices.push(...network.devices);
-            }
-          }
-        }
+    //     return devices;
+    //   }
+    // },
 
-        return devices;
-      }
-    },
+    // _formatBimProperty(bim) {
+    //   if (this.configuration.bimData.useFunction) {
+    //     return this._formatValue(
+    //       bim.property.displayValue,
+    //       this.configuration.bimData.callback.code
+    //     );
+    //   }
 
-    _formatBimProperty(bim) {
-      if (this.configuration.bimData.useFunction) {
-        return this._formatValue(
-          bim.property.displayValue,
-          this.configuration.bimData.callback.code
-        );
-      }
+    //   return bim.property.displayValue;
+    // },
 
-      return bim.property.displayValue;
-    },
+    // _formatBmsProperty(bms) {
+    //   if (this.configuration.bmsData.useFunction) {
+    //     return this._formatValue(
+    //       bms.property.displayValue,
+    //       this.configuration.bmsData.callback.code
+    //     );
+    //   }
+    //   return bms.property.displayValue;
+    // },
 
-    _formatBmsProperty(bms) {
-      if (this.configuration.bmsData.useFunction) {
-        return this._formatValue(
-          bms.property.displayValue,
-          this.configuration.bmsData.callback.code
-        );
-      }
-      return bms.property.displayValue;
-    },
-
-    _formatValue(value, callback) {
-      return eval(`(${callback})('${value}')`);
-    },
+    // _formatValue(value, callback) {
+    //   return eval(`(${callback})('${value}')`);
+    // },
 
     // will be change
-    getElementProperties(argItems, attributeName) {
-      const dbIdMap = new Map();
-      const promises = argItems.map(async (el) => {
-        const fileName = spinal.spinalGraphService
-          .getInfo(el.bimFileId)
-          .name.get();
+    // getElementProperties(argItems, attributeName) {
+    //   const dbIdMap = new Map();
+    //   const promises = argItems.map(async (el) => {
+    //     const fileName = spinal.spinalGraphService
+    //       .getInfo(el.bimFileId)
+    //       .name.get();
 
-        const model = window.spinal.BimObjectService.getModelByName(fileName);
+    //     const model = window.spinal.BimObjectService.getModelByName(fileName);
 
-        if (!model) throw "make sure your load all scene";
+    //     if (!model) throw "make sure your load all scene";
 
-        el.property = await AttributesUtilities.findAttribute(
-          model,
-          el.dbid,
-          attributeName
-        );
-        return el;
-      });
+    //     el.property = await AttributesUtilities.findAttribute(
+    //       model,
+    //       el.dbid,
+    //       attributeName
+    //     );
+    //     return el;
+    //   });
 
-      try {
-        return Promise.all(promises).then((result) => {
-          return {
-            validItems: result.filter((el) => el.property),
-            invalidItems: result.filter((el) => !el.property),
-          };
-        });
-      } catch (error) {
-        throw error;
-      }
-
-      // const dbIdMap = new Map();
-      // const promises = argItems.map(async (el) => {
-      //   const model = window.spinal.BimObjectService.getModelByBimfile(
-      //     el.bimFileId
-      //   );
-      //   // if (!model) throw "make sure your load all scene";
-      //   console.log(model, el.bimFileId);
-      //   el.property = await AttributesUtilities.findAttribute(
-      //     model,
-      //     el.dbid,
-      //     attributeName
-      //   );
-      //   return el;
-      // });
-
-      // // try {
-      // //   return Promise.all(promises).then((result) => {
-      // //     return {
-      // //       validItems: result.filter((el) => el.property),
-      // //       invalidItems: result.filter((el) => !el.property),
-      // //     };
-      // //   });
-      // // } catch (error) {
-      // //   throw new Error("");
-      // // }
-
-      /////////////////////////////////////////////////////////////////////////////////////////
-
-      // const items = lodash
-      //    .chain(argItems)
-      //    .groupBy("bimFileId")
-      //    .map((value, key) => {
-      //       return {
-      //          model: window.spinal.BimObjectService.getModelByBimfile(key),
-      //          selection: value.map((el) => {
-      //             dbIdMap.set(el.dbid, el.id);
-      //             return el.dbid;
-      //          }),
-      //       };
-      //    })
-      //    .value();
-
-      // const data = await bimObjectManagerService.getBimObjectProperties(
-      //    items
-      // );
-      // const promises = [];
-
-      // for (const item of data) {
-      //    promises.push(
-      //       this._getItemPropertiesFormatted(
-      //          item.model,
-      //          item.properties,
-      //          attributeName
-      //       )
-      //    );
-      // }
-
-      // return Promise.all(promises).then((result) => {
-      //    const resultFlatted = result.flat();
-
-      //    const res = {
-      //       validItems: [],
-      //       invalidItems: [],
-      //    };
-
-      //    for (const el of resultFlatted) {
-      //       el.id = dbIdMap.get(el.dbId);
-      //       if (el.property) {
-      //          res.validItems.push(el);
-      //       } else {
-      //          res.invalidItems.push(el);
-      //       }
-      //    }
-
-      //    return res;
-      // });
-    },
+    //   try {
+    //     return Promise.all(promises).then((result) => {
+    //       return {
+    //         validItems: result.filter((el) => el.property),
+    //         invalidItems: result.filter((el) => !el.property),
+    //       };
+    //     });
+    //   } catch (error) {
+    //     throw error;
+    //   }
+    // },
 
     // _getItemPropertiesFormatted(model, itemList, attributeName, nodeId) {
     //    const promises = itemList.map(async (el) => {
@@ -674,7 +552,8 @@ export default {
       /* !this.contextSelected || */
       return (
         (this.isAutomate && !this.deviceSelected) ||
-        !this.networkSelected ||
+        // !this.networkSelected ||
+        !this.contextSelected ||
         this.pageSelected === this.PAGES.loading ||
         this.pageSelected === this.PAGES.result ||
         this.pageSelected === this.PAGES.success
