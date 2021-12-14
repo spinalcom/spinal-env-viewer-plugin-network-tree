@@ -115,7 +115,7 @@ with this file. If not, see
 
           <div v-else
                class="allItemsLinked">
-            All items are linkedAC
+            All items are linked
           </div>
         </div>
 
@@ -168,13 +168,19 @@ export default {
       let profileItemList = this.data.invalidProfileItems;
       const validList = this.data.valids;
 
-      editListController.removeItemItemFromValidList(
-        validList,
-        automateItemList,
-        profileItemList,
-        automateItemId,
-        profileItemId
-      );
+      editListController
+        .removeItemFromValidList(
+          validList,
+          automateItemList,
+          profileItemList,
+          automateItemId,
+          profileItemId
+        )
+        .then(({ invalidAutomateItems, invalidProfileItems, validList }) => {
+          this.data.invalidAutomateItems = invalidAutomateItems;
+          this.data.invalidProfileItems = invalidProfileItems;
+          this.data.valids = validList;
+        });
     },
 
     disableLink() {

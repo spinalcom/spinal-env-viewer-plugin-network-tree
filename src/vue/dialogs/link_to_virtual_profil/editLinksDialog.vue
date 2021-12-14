@@ -26,7 +26,8 @@ with this file. If not, see
   <md-dialog :md-active.sync="showDialog"
              @md-closed="closeDialog(false)"
              class="linkerDialogsContent">
-    <md-dialog-title style="text-align : center">Unlink Profil</md-dialog-title>
+    <md-dialog-title style="text-align : center">Edit Profil Link
+    </md-dialog-title>
 
     <md-dialog-content>
       <edit-link v-if="!success"
@@ -77,6 +78,12 @@ export default {
   },
   methods: {
     async opened(option) {
+      if (option.data) {
+        console.log("inside data");
+        this.data = JSON.parse(JSON.stringify(option.data));
+        this.callback = option.callback;
+        return;
+      }
       // this.data = JSON.parse(JSON.stringify(option.data));
       this.data = await LinkNetworkTreeService.getDeviceAndProfilData(
         option.nodeId
@@ -85,6 +92,10 @@ export default {
     },
 
     async editLink() {
+      if (typeof this.callback === "function") {
+        console.log("this.callback is a function");
+        return this.closeDialog(true);
+      }
       const validPromises = this.data.valids.map(
         ({ automateItem, profileItem }) =>
           LinkNetworkTreeService.linkAutomateItemToProfilItem(
@@ -104,8 +115,8 @@ export default {
     },
 
     async removed(option) {
-      if (option) {
-        // // if (typeof this.callback === "function") this.callback(this.data);
+      if (option && typeof this.callback === "function") {
+        this.callback(this.data);
         // const validPromises = this.data.valids.map(
         //    ({ automateItem, profileItem }) =>
         //       LinkNetworkTreeService.linkAutomateItemToProfilItem(

@@ -70,6 +70,7 @@ export default {
         data: this.results,
         nodeId: this.results.automate.id,
         callback: (dataEdited) => {
+          console.log("dataEdited", dataEdited);
           this.$emit("edit", {
             automateId: this.results.automate.id,
             value: dataEdited,

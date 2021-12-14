@@ -40,7 +40,7 @@ export default {
     }
   },
 
-  removeItemItemFromValidList(
+  async removeItemFromValidList(
     validList,
     invalidAutomateItems,
     invalidProfileItems,
@@ -53,15 +53,25 @@ export default {
         item.profileItem.id === profileItemId
     );
 
-    if (indice == -1) return;
-
-    const found = validList[indice];
-
-    if (found) {
-      invalidAutomateItems = [found.automateItem, ...invalidAutomateItems];
-      invalidProfileItems = [found.profileItem, ...invalidProfileItems];
-
-      validList.splice(indice, 1);
+    if (indice != -1) {
+      const found = validList[indice];
+      if (found) {
+        return {
+          invalidAutomateItems: [found.automateItem, ...invalidAutomateItems],
+          invalidProfileItems: [found.profileItem, ...invalidProfileItems],
+          validList: validList.filter(
+            (item) =>
+              item.automateItem.id != automateItemId &&
+              item.profileItem.id != profileItemId
+          ),
+        };
+      }
     }
+
+    return {
+      invalidAutomateItems,
+      invalidProfileItems,
+      validList,
+    };
   },
 };
