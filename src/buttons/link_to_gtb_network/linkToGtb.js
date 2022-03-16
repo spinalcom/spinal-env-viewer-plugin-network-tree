@@ -28,7 +28,7 @@ class LinkToGTBNetworkBtn extends SpinalContextApp {
     // const isAutomate = option.selectedNode.isAutomate && option.selectedNode.isAutomate.get()
     if (contextType !== CONSTANTS.CONTEXT_TYPE) return Promise.resolve(-1);
 
-    if (type === BIM_OBJECT_TYPE && !nodeIsAutomate(Option.selectedNode))
+    if (type === BIM_OBJECT_TYPE && !nodeIsAutomate(option.selectedNode))
       return Promise.resolve(-1);
 
     return Promise.resolve(true);
