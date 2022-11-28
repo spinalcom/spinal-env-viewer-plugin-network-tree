@@ -29,12 +29,14 @@ export default {
   },
 
   async createLinkBetweenBimAndBms(bmsContextId, validResultList, percent) {
+    console.log("use profile");
     const listeLength = validResultList.length;
     let isError = false;
     let counter = 0;
 
     while (!isError && listeLength > counter) {
       const { profileItem, automateItem } = validResultList[counter];
+      console.log(profileItem, automateItem);
       if (profileItem && automateItem) {
         try {
           await LinkBmsDeviceService.LinkBmsDeviceToBimDevices(
@@ -47,8 +49,59 @@ export default {
 
           percent = Math.floor((100 * counter) / listeLength);
         } catch (error) {
+          console.error(error);
           counter++;
-          // console.error(error);
+          // isError = true;
+        }
+      }
+    }
+  },
+
+  async createLinkBetweenBimAndBmsUsingAttribute(
+    bmsContextId,
+    validResultList,
+    percent
+  ) {
+    const listeLength = validResultList.length;
+    let isError = false;
+    let counter = 0;
+
+    while (!isError && listeLength > counter) {
+      const { profileItem, automateItem } = validResultList[counter];
+
+      if (profileItem && automateItem) {
+        try {
+          const bmsConfig = {
+            contextId: bmsContextId,
+            deviceId: profileItem.id,
+            attribute: {
+              attributeName: profileItem.property.attributeName,
+              categoryName: profileItem.property.categoryName,
+            },
+          };
+
+          const bimConfig = {
+            nodeId: automateItem.id,
+            model: window.spinal.BimObjectService.getModelByBimfile(
+              automateItem.bimFileId
+            ),
+            attribute: {
+              attributeName: automateItem.property.attributeName,
+              categoryName: automateItem.property.categoryName,
+            },
+          };
+
+          await LinkBmsDeviceService.LinkBmsDeviceToBimDevicesUsingAttribute(
+            bmsConfig,
+            bimConfig
+          );
+
+          counter++;
+
+          percent = Math.floor((100 * counter) / listeLength);
+        } catch (error) {
+          console.error(error);
+          counter++;
           // isError = true;
         }
       }
@@ -194,16 +247,17 @@ export default {
       //     .getInfo(el.bimFileId)
       //     .name.get();
 
-      const { bimFileId, dbid } = el;
+      const { bimFileId, dbid, id } = el;
 
       const model = window.spinal.BimObjectService.getModelByBimfile(bimFileId);
 
-      if (!model) throw "make sure your load all scene";
+      // if (!model) throw "make sure you load all scene";
 
       el.property = await AttributesUtilities.findAttribute(
         model,
         dbid,
-        attributeName
+        attributeName,
+        id
       );
       return el;
     });

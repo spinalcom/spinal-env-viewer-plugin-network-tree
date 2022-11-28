@@ -100,8 +100,6 @@ with this file. If not, see
 </template>
 
 <script>
-import { bimObjectManagerService } from "spinal-env-viewer-bim-manager-service";
-import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 import linkBimToBmsControllers from "../../../js/controllers/links/linkBimToBmsControllers";
 // import linkAutomateToBmsDeviceUtilities from "../../../js/link_utilities/linkAutomateToBmsDevice";
 
@@ -159,6 +157,8 @@ export default {
           useFunction: false,
           callback: { code: bmsDataFunction },
         },
+
+        useTheseAttributes: false,
       },
 
       percent: 0,
@@ -225,12 +225,12 @@ export default {
 
     async createLink() {
       this.pageSelected = this.PAGES.creation;
-      return linkBimToBmsControllers
-        .createLinkBetweenBimAndBms(
-          this.contextSelected,
-          this.result.valids,
-          this.percent
-        )
+
+      return (() => {
+        if (!this.configuration.useTheseAttributes)
+          return this._useProfileToLink();
+        return this._useAttributeToLink();
+      })()
         .then(() => {
           this.pageSelected = this.PAGES.success;
         })
@@ -238,36 +238,22 @@ export default {
           console.error(err);
           this.pageSelected = this.PAGES.error;
         });
-      // const liste = this.result.valids;
-      // const listeLength = liste.length;
-      // let isError = false;
-      // let counter = 0;
+    },
 
-      // while (!isError && listeLength > counter) {
-      //   const item = liste[counter];
-      //   if (item) {
-      //     try {
-      //       await LinkBmsDeviceService.LinkBmsDeviceToBimDevices(
-      //         this.contextSelected,
-      //         item.profileItem.id,
-      //         item.automateItem.id
-      //       );
+    _useProfileToLink() {
+      return linkBimToBmsControllers.createLinkBetweenBimAndBms(
+        this.contextSelected,
+        this.result.valids,
+        this.percent
+      );
+    },
 
-      //       counter++;
-
-      //       this.percent = Math.floor((100 * counter) / listeLength);
-      //     } catch (error) {
-      //       counter++;
-      //       // console.error(error);
-      //       // isError = true;
-      //     }
-      //   }
-      // }
-
-      // if (isError) {
-      //   this.pageSelected = this.PAGES.error;
-      //   return;
-      // }
+    _useAttributeToLink() {
+      return linkBimToBmsControllers.createLinkBetweenBimAndBmsUsingAttribute(
+        this.contextSelected,
+        this.result.valids,
+        this.percent
+      );
     },
 
     loadData() {
@@ -284,32 +270,6 @@ export default {
         }
       );
     },
-
-    // _getAutomates(selectionNodeId, contextId) {
-    //   return SpinalGraphService.findInContext(
-    //     selectionNodeId,
-    //     contextId,
-    //     (node) => {
-    //       if (node.info.isAutomate && node.info.isAutomate.get()) {
-    //         SpinalGraphService._addNode(node);
-    //         return true;
-    //       }
-
-    //       return false;
-    //     }
-    //   ).then((result) => {
-    //     return result.map((el) => el.get());
-    //   });
-    // },
-
-    // getDeviceContextTreeStructure() {
-    //   return linkBimToBmsControllers
-    //     .getBmsDevicesContextTreeStructure()
-    //     .then((result) => {
-    //       this.data = result;
-    //       this.updateNetworks();
-    //     });
-    // },
 
     goToNext() {
       const currentPage = this.pageSelected;
