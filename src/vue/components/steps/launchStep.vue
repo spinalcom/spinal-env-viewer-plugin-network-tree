@@ -21,29 +21,19 @@ with this file. If not, see
 <template>
 	<div class="content">
 		<div class="buttons" v-if="appState === STATES.normal">
-			<md-button
-				v-if="!verified"
-				:disabled="disableVerificationButton"
-				class="md-raised md-primary"
-				@click="launchVerification"
-			>
+			<md-button v-if="!verified" :disabled="disableVerificationButton" class="md-raised md-primary"
+				@click="launchVerification">
 				Verify
 			</md-button>
 
 			<div class="content-items" v-else-if="verified">
 				<div class="content-item">
-					<md-button
-						class="resultVerification md-dense md-primary"
-						@click="selectItems(validItems)"
-					>
+					<md-button class="resultVerification md-dense md-primary" @click="selectItems(validItems)">
 						Valid item(s) :
 						{{ validItems.length }}
 					</md-button>
 
-					<md-button
-						class="resultVerification md-dense md-accent"
-						@click="selectItems(invalidItems)"
-					>
+					<md-button class="resultVerification md-dense md-accent" @click="selectItems(invalidItems)">
 						invalid item(s) :
 						{{ invalidItems.length }}
 					</md-button>
@@ -51,36 +41,26 @@ with this file. If not, see
 
 				<div class="content-item classifyContent">
 					<div class="checkbox">
-						<md-checkbox v-model="classify.class" class="md-primary"
-							>Classify controllers By</md-checkbox
-						>
+						<md-checkbox v-model="classify.class" class="md-primary">Classify controllers By</md-checkbox>
 					</div>
 
 					<div class="input">
 						<md-field>
 							<label>Attribute name</label>
-							<md-input
-								:disabled="!classify.class"
-								v-model="classify.by"
-							></md-input>
+							<md-input :disabled="!classify.class" v-model="classify.by"></md-input>
 						</md-field>
 					</div>
 				</div>
 
 				<div class="content-item">
-					<md-checkbox v-model="dontCreateEmptyAutomate" class="md-primary"
-						>Don't create Controllers which do not control
-						equipment</md-checkbox
-					>
+					<md-checkbox v-model="dontCreateEmptyAutomate" class="md-primary">Don't create Controllers which do
+						not control
+						equipment</md-checkbox>
 				</div>
 
 				<div class="content-item">
-					<md-button
-						:disabled="error"
-						class="md-raised md-primary"
-						@click="launchGeneration"
-						>Launch Generation</md-button
-					>
+					<md-button :disabled="error" class="md-raised md-primary" @click="launchGeneration">Launch
+						Generation</md-button>
 
 					<!--  
                <md-button
@@ -98,11 +78,7 @@ with this file. If not, see
 		<div class="progress-bar" v-else-if="appState === STATES.creation">
 			<div class="percent-number">{{ percent }} %</div>
 			<!-- md-mode="determinate" -->
-			<md-progress-bar
-				class="percent-bar"
-				md-mode="buffer"
-				:md-value="percent"
-			></md-progress-bar>
+			<md-progress-bar class="percent-bar" md-mode="buffer" :md-value="percent"></md-progress-bar>
 		</div>
 
 		<div class="state" v-else-if="appState === STATES.success">
@@ -116,321 +92,284 @@ with this file. If not, see
 </template>
 
 <script>
-	import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-	// // import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-	// import generateAutomateService from "../../../js/generateAutomateService";
-	// import spinalNetworkTreeService from "../../../services/index";
+import { SpinalGraph, SpinalGraphService, SPINAL_RELATION_PTR_LST_TYPE } from "spinal-env-viewer-graph-service";
+// // import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+// import generateAutomateService from "../../../js/generateAutomateService";
+// import spinalNetworkTreeService from "../../../services/index";
 
-	import {
-		NetworkTreeService,
-		GenerateNetworkTreeService,
-		AttributesUtilities,
-		CONSTANTS,
-	} from "spinal-env-viewer-plugin-network-tree-service";
+import {
+	NetworkTreeService,
+	GenerateNetworkTreeService,
+	AttributesUtilities,
+	CONSTANTS,
+} from "spinal-env-viewer-plugin-network-tree-service";
 
-	export default {
-		name: "launchGeneration",
-		props: {
-			automatesObj: {},
-			equipmentsObj: {},
-			attribute: {},
-			error: {},
-			contextId: {},
-			selectedNodeId: {},
-			changed: {},
-			namingConvention: {},
+export default {
+	name: "launchGeneration",
+	props: {
+		automatesObj: {},
+		equipmentsObj: {},
+		attribute: {},
+		error: {},
+		contextId: {},
+		selectedNodeId: {},
+		changed: {},
+		namingConvention: {},
+	},
+	data() {
+		this.STATES = {
+			loading: 1,
+			normal: 2,
+			creation: 3,
+			success: 4,
+			error: 5,
+		};
+		// this.automatesVerificationResult = {};
+		// this.equipementsVerificationResult = {};
+
+		this.tree = [];
+		this.floorsInGraph = null;
+
+		return {
+			percent: 0,
+			verified: false,
+			valueGrouped: null,
+			appState: this.STATES.normal,
+			validItems: [],
+			invalidItems: [],
+			dontCreateEmptyAutomate: true,
+			classify: {
+				class: true,
+				by: "Niveau",
+			},
+		};
+	},
+	methods: {
+		async launchVerification() {
+			this.appState = this.STATES.loading;
+			this.formatData().then(
+				({ automatesProperties, equipementsProperties }) => {
+					return GenerateNetworkTreeService.createTree(
+						automatesProperties,
+						equipementsProperties,
+						this.attribute
+					).then(({ tree, invalids, valids }) => {
+						this.tree = tree;
+						this.validItems = valids;
+						this.invalidItems = invalids;
+
+						this.verified = true;
+						this.appState = this.STATES.normal;
+						this.$emit("verified");
+					});
+
+					// this.automatesVerificationResult = result.automatesProperties;
+					// this.equipementsVerificationResult = result.equipementsProperties;
+					//    this.verified = true;
+					//    this.appState = this.STATES.normal;
+					//    this.$emit("verified");
+				}
+			);
 		},
-		data() {
-			this.STATES = {
-				loading: 1,
-				normal: 2,
-				creation: 3,
-				success: 4,
-				error: 5,
-			};
-			// this.automatesVerificationResult = {};
-			// this.equipementsVerificationResult = {};
 
-			this.tree = [];
+		async launchGeneration() {
+			this.appState = this.STATES.creation;
+			let tree = [...this.tree];
 
-			return {
-				percent: 0,
-				verified: false,
-				valueGrouped: null,
-				appState: this.STATES.normal,
-				validItems: [],
-				invalidItems: [],
-				dontCreateEmptyAutomate: true,
-				classify: {
-					class: true,
-					by: "Niveau",
-				},
-			};
-		},
-		methods: {
-			async launchVerification() {
-				this.appState = this.STATES.loading;
-				this.formatData().then(
-					({ automatesProperties, equipementsProperties }) => {
-						return GenerateNetworkTreeService.createTree(
-							automatesProperties,
-							equipementsProperties,
-							this.attribute
-						).then(({ tree, invalids, valids }) => {
-							this.tree = tree;
-							this.validItems = valids;
-							this.invalidItems = invalids;
-
-							this.verified = true;
-							this.appState = this.STATES.normal;
-							this.$emit("verified");
-						});
-
-						// this.automatesVerificationResult = result.automatesProperties;
-						// this.equipementsVerificationResult = result.equipementsProperties;
-						//    this.verified = true;
-						//    this.appState = this.STATES.normal;
-						//    this.$emit("verified");
-					}
-				);
-			},
-
-			async launchGeneration() {
-				this.appState = this.STATES.creation;
-				let tree = [...this.tree];
-
-				if (this.dontCreateEmptyAutomate) {
-					tree = this.tree.filter((el) => el.children.length > 0);
-				}
-
-				const Listelength = tree.length;
-				let isError = false;
-
-				while (!isError && tree.length > 0) {
-					const item = tree.shift();
-					try {
-						if (item) {
-							const parentId = await this.getOrCreateParentId(
-								this.contextId,
-								this.selectedNodeId,
-								item
-							);
-
-							console.log("parentId", item);
-
-							await GenerateNetworkTreeService._createNodes(
-								this.contextId,
-								item,
-								parentId
-							);
-
-							this.percent = Math.floor(
-								(100 * (Listelength - tree.length)) / Listelength
-							);
-						}
-					} catch (error) {
-						console.error(error);
-						isError = true;
-					}
-				}
-
-				if (isError) {
-					this.appState = this.STATES.error;
-					return;
-				}
-
-				this.appState = this.STATES.success;
-			},
-
-			// createNode(liste, contextId, nodeId, Listelength) {
-			//    return new Promise((resolve, reject) => {
-			//       this.createNodeRecur(
-			//          liste,
-			//          contextId,
-			//          nodeId,
-			//          Listelength,
-			//          resolve
-			//       );
-			//    });
-			// },
-
-			// async createNodeRecur(liste, contextId, nodeId, Listelength, resolve) {
-			//    const item = liste.shift();
-			//    if (item) {
-			//       const parentId = await this.getOrCreateParentId(
-			//          contextId,
-			//          nodeId,
-			//          item
-			//       );
-
-			//       GenerateNetworkTreeService._createNodes(contextId, item, parentId)
-			//          .then(() => {
-			//             this.percent = Math.floor(
-			//                (100 * (Listelength - liste.length)) / Listelength
-			//             );
-
-			//             this.createNodeRecur(
-			//                liste,
-			//                contextId,
-			//                nodeId,
-			//                Listelength,
-			//                resolve
-			//             );
-			//          })
-			//          .catch((err) => {
-			//             console.error(err);
-			//             this.percent = Math.floor(
-			//                (100 * (Listelength - liste.length)) / Listelength
-			//             );
-
-			//             this.createNodeRecur(
-			//                liste,
-			//                contextId,
-			//                nodeId,
-			//                Listelength,
-			//                resolve
-			//             );
-			//          });
-			//    } else {
-			//       resolve(true);
-			//    }
-			// },
-
-			async getOrCreateParentId(contextId, nodeId, item) {
-				if (!this.classify.class) {
-					return nodeId;
-				}
-
-				const val = this.classify.by;
-
-				// const found = item.properties.find(
-				//    (el) => el.attributeName == val || el.displayName == val
-				// );
-				const found = await AttributesUtilities.findAttribute(
-					item.model,
-					item.dbId,
-					val
-				);
-
-				const parentName =
-					found && found.displayValue ? found.displayValue : "Others";
-
-				const children = await SpinalGraphService.getChildren(nodeId, [
-					// spinalNetworkTreeService.constants.NETWORK_RELATION,
-					CONSTANTS.NETWORK_RELATION,
-				]);
-
-				const parentFound = children.find(
-					(el) => el.name.get() == parentName
-				);
-
-				if (parentFound) return parentFound.id.get();
-
-				// const parent = await spinalNetworkTreeService.addNetwork(
-				//    parentName,
-				//    nodeId,
-				//    contextId
-				// );
-
-				const parent = await NetworkTreeService.addNetwork(
-					parentName,
-					nodeId,
-					contextId
-				);
-
-				SpinalGraphService._addNode(parent);
-				return parent.getId().get();
-			},
-
-			_displayResult(result) {
-				this.appState = result;
-				setTimeout(() => {
-					this.appState = this.STATES.normal;
-				}, 1000);
-			},
-
-			formatData() {
-				const promises = [
-					GenerateNetworkTreeService.getElementProperties(
-						this.automatesObj.items,
-						this.automatesObj.attributeName,
-						this.namingConvention
-					),
-					GenerateNetworkTreeService.getElementProperties(
-						this.equipmentsObj.items,
-						this.equipmentsObj.attributeName,
-						this.namingConvention
-					),
-				];
-
-				return Promise.all(promises).then((result) => {
-					return {
-						automatesProperties: result[0] && result[0].validItems,
-						equipementsProperties: result[1] && result[1].validItems,
-					};
-				});
-			},
-
-			selectItems(argItems) {
-				const items =
-					GenerateNetworkTreeService.classifyDbIdsByModel(argItems);
-				window.spinal.ForgeViewer.viewer.impl.selector.setAggregateSelection(
-					items
-				);
-			},
-		},
-		computed: {
-			disableVerificationButton() {
-				return (
-					(this.automatesObj.items.length === 0 &&
-						this.automatesObj.attributeName.trim().length === 0) ||
-					(this.equipmentsObj.items.length === 0 &&
-						this.equipmentsObj.attributeName.trim().length === 0)
-				);
-			},
-		},
-		watch: {
-			changed() {
-				if (this.changed) {
-					this.appState = this.STATES.normal;
-					this.verified = false;
-				}
-			},
-			// attribute() {
-			//   this.verified = false;
+			// if (this.dontCreateEmptyAutomate) {
+			// 	tree = this.tree.filter((el) => el.children.length > 0);
 			// }
+
+			const Listelength = tree.length;
+			let isError = false;
+
+			while (!isError && tree.length > 0) {
+				const item = tree.shift();
+
+				// skip if the item is empty and dontCreateEmptyAutomate is true
+				if (this.dontCreateEmptyAutomate && item.children.length === 0) continue;
+
+				try {
+					if (item) {
+						const parentId = await this.getOrCreateParentId(this.contextId, this.selectedNodeId, item);
+						await GenerateNetworkTreeService._createNodes(this.contextId, item, parentId);
+
+						if (this.isClassifyByLevel()) await this.linkToFloor(parentId);
+
+						this.percent = Math.floor((100 * (Listelength - tree.length)) / Listelength);
+					}
+				} catch (error) {
+					console.error(error);
+					isError = true;
+				}
+			}
+
+			if (isError) {
+				this.appState = this.STATES.error;
+				return;
+			}
+
+			this.appState = this.STATES.success;
 		},
-	};
+
+		isClassifyByLevel() {
+			const possibleAttributes = ["niveau", "level", "floor", "etage"];
+			return this.classify.class && possibleAttributes.includes(this.classify.by.toLowerCase());
+		},
+
+		async linkToFloor(automateGroupId) {
+			if (this.floorsInGraph == null) this.floorsInGraph = await this.getFloorsInGraph();
+			const info = SpinalGraphService.getInfo(automateGroupId);
+
+			const floorFound = this.floorsInGraph[info.name.get()];
+			if (floorFound) {
+				SpinalGraphService._addNode(floorFound);
+				const floorId = floorFound.id.get();
+
+				await SpinalGraphService.addChild(floorId, automateGroupId, "hasNetworkTree", SPINAL_RELATION_PTR_LST_TYPE);
+			}
+		},
+
+
+		async getFloorsInGraph() {
+			const contexts = await SpinalGraphService.getContextWithType("geographicContext");
+			let context = contexts.find((el) => el.name.get().toLowerCase() === "spatial");
+
+			if (!context) return {};
+
+			const building = (await context.getChildren("hasGeographicBuilding"))[0];
+			if (!building) return {};
+
+			const floors = await building.getChildren("hasGeographi cFloor");
+			if (!floors || floors.length === 0) return {};
+
+			return floors.reduce((acc, floor) => {
+				const name = floor.name.get();
+				acc[name] = floor;
+				return acc;
+			}, {});
+		},
+
+		async getOrCreateParentId(contextId, nodeId, item) {
+			if (!this.classify.class) {
+				return nodeId;
+			}
+
+			const val = this.classify.by;
+
+			// const found = item.properties.find(
+			//    (el) => el.attributeName == val || el.displayName == val
+			// );
+			const found = await AttributesUtilities.findAttribute(item.model, item.dbId, val);
+
+			const parentName = found && found.displayValue ? found.displayValue : "Others";
+
+			const children = await SpinalGraphService.getChildren(nodeId, [
+				// spinalNetworkTreeService.constants.NETWORK_RELATION,
+				CONSTANTS.NETWORK_RELATION,
+			]);
+
+			const parentFound = children.find((el) => el.name.get() == parentName);
+
+			if (parentFound) return parentFound.id.get();
+
+
+			const parent = await NetworkTreeService.addNetwork(parentName, nodeId, contextId);
+
+			SpinalGraphService._addNode(parent);
+			return parent.getId().get();
+		},
+
+		_displayResult(result) {
+			this.appState = result;
+			setTimeout(() => {
+				this.appState = this.STATES.normal;
+			}, 1000);
+		},
+
+		formatData() {
+			const promises = [
+				GenerateNetworkTreeService.getElementProperties(
+					this.automatesObj.items,
+					this.automatesObj.attributeName,
+					this.namingConvention
+				),
+				GenerateNetworkTreeService.getElementProperties(
+					this.equipmentsObj.items,
+					this.equipmentsObj.attributeName,
+					this.namingConvention
+				),
+			];
+
+			return Promise.all(promises).then((result) => {
+				return {
+					automatesProperties: result[0] && result[0].validItems,
+					equipementsProperties: result[1] && result[1].validItems,
+				};
+			});
+		},
+
+		selectItems(argItems) {
+			const items =
+				GenerateNetworkTreeService.classifyDbIdsByModel(argItems);
+			window.spinal.ForgeViewer.viewer.impl.selector.setAggregateSelection(
+				items
+			);
+		},
+	},
+	computed: {
+		disableVerificationButton() {
+			return (
+				(this.automatesObj.items.length === 0 &&
+					this.automatesObj.attributeName.trim().length === 0) ||
+				(this.equipmentsObj.items.length === 0 &&
+					this.equipmentsObj.attributeName.trim().length === 0)
+			);
+		},
+	},
+	watch: {
+		changed() {
+			if (this.changed) {
+				this.appState = this.STATES.normal;
+				this.verified = false;
+			}
+		},
+		// attribute() {
+		//   this.verified = false;
+		// }
+	},
+};
 </script>
 
 <style scoped>
-	.content {
-		width: 100%;
-		height: 100%;
-	}
-	.content .buttons {
-		width: 100%;
-		display: flex;
-		justify-content: center;
-	}
+.content {
+	width: 100%;
+	height: 100%;
+}
 
-	.content .buttons .content-items {
-		width: 100%;
-		height: 100%;
-	}
+.content .buttons {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
 
-	.content .buttons .content-items .content-item {
-		width: 100%;
-		height: 50px;
-		margin-bottom: 5px;
-	}
+.content .buttons .content-items {
+	width: 100%;
+	height: 100%;
+}
 
-	.content .buttons .content-items .content-item.classifyContent {
-		display: flex;
-		align-items: center;
-	}
+.content .buttons .content-items .content-item {
+	width: 100%;
+	height: 50px;
+	margin-bottom: 5px;
+}
 
-	/* .content
+.content .buttons .content-items .content-item.classifyContent {
+	display: flex;
+	align-items: center;
+}
+
+/* .content
    .buttons
    .content-items
    .content-item.content-item.classifyContent
@@ -444,27 +383,29 @@ with this file. If not, see
    .input {
 } */
 
-	.state {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
+.state {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
 
-	.progress-bar {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-	.progress-bar .percent-number {
-		font-size: 1.8em;
-		margin: 10px 0;
-	}
-	.progress-bar .percent-bar {
-		width: 90%;
-	}
+.progress-bar {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.progress-bar .percent-number {
+	font-size: 1.8em;
+	margin: 10px 0;
+}
+
+.progress-bar .percent-bar {
+	width: 90%;
+}
 </style>

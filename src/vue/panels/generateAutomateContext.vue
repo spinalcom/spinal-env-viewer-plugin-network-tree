@@ -24,84 +24,42 @@ with this file. If not, see
 
 <template>
    <div class="generation_container">
-      <md-steppers
-         md-vertical
-         class="steppers"
-         :md-dynamic-height="true"
-         @md-changed="changeStep"
-      >
+      <md-steppers md-vertical class="steppers" :md-dynamic-height="true" @md-changed="changeStep">
 
-         <md-step
-            id="first"
-            md-label="Controller selection"
-            md-description="Select all controllers"
-         >
+         <md-step id="first" md-label="Controller selection" md-description="Select all controllers">
             <div class="step-container md-scrollbar">
-               <selection-step
-                  :config="data.objAutomate"
-                  @clear="clearAutomates"
-                  @changed="() => this.changed = true"
-               ></selection-step>
+               <selection-step :config="data.objAutomate" @clear="clearAutomates"
+                  @changed="() => this.changed = true"></selection-step>
             </div>
 
          </md-step>
 
-         <md-step
-            id="second"
-            md-label="Selection of controlled objects"
-            md-description="Select all controlled objects"
-         >
+         <md-step id="second" md-label="Selection of controlled objects" md-description="Select all controlled objects">
             <md-content class="step-container md-scrollbar">
-               <selection-step
-                  :config="data.objEquipment"
-                  @clear="clearEquipments"
-                  @changed="() => this.changed = true"
-               ></selection-step>
+               <selection-step :config="data.objEquipment" @clear="clearEquipments"
+                  @changed="() => this.changed = true"></selection-step>
             </md-content>
          </md-step>
 
-         <md-step
-            id="third"
-            md-label="Configuration Controllers and objects association"
-            md-description="Wich objects are controlled by which controller"
-            :md-error="errorInConfig"
-         >
+         <md-step id="third" md-label="Configuration Controllers and objects association"
+            md-description="Wich objects are controlled by which controller" :md-error="errorInConfig">
             <md-content class="step-container md-scrollbar">
-               <configuration-step
-                  :automateObj="data.objAutomate"
-                  :equipmentObj="data.objEquipment"
-                  :attribute="data.attribute"
-                  @changed="() => this.changed = true"
-               ></configuration-step>
+               <configuration-step :automateObj="data.objAutomate" :equipmentObj="data.objEquipment"
+                  :attribute="data.attribute" @changed="() => this.changed = true"></configuration-step>
             </md-content>
 
          </md-step>
 
-         <md-step
-            id="fourth"
-            md-label="Configure naming Convention"
-            md-description="create the network tree structure"
-         >
+         <md-step id="fourth" md-label="Configure naming Convention" md-description="create the network tree structure">
             <naming-convention-step :config="data.namingConvention"></naming-convention-step>
          </md-step>
 
-         <md-step
-            id="fifth"
-            md-label="Creation Step"
-            md-description="create the network tree structure"
-         >
+         <md-step id="fifth" md-label="Creation Step" md-description="create the network tree structure">
 
             <div class="step-container md-scrollbar">
-               <launch-generation-step
-                  :automatesObj="data.objAutomate"
-                  :equipmentsObj="data.objEquipment"
-                  :attribute="data.attribute"
-                  :namingConvention="data.namingConvention"
-                  :contextId="contextId"
-                  :selectedNodeId="selectedNodeId"
-                  :changed="changed"
-                  @verified="() => this.changed = false"
-               >
+               <launch-generation-step :automatesObj="data.objAutomate" :equipmentsObj="data.objEquipment"
+                  :attribute="data.attribute" :namingConvention="data.namingConvention" :contextId="contextId"
+                  :selectedNodeId="selectedNodeId" :changed="changed" @verified="() => changed = false">
                </launch-generation-step>
             </div>
 
@@ -156,13 +114,13 @@ export default {
                text: "",
                flags: [],
                select: CONSTANTS.OBJECT_ATTR,
-               callback: () => {},
+               callback: () => { },
             },
             namingConvention: {
                attributeName: "CFA_Repère d'équipement",
                useAttrValue: true,
                personalized: {
-                  callback: () => {},
+                  callback: () => { },
                },
             },
             // attribute: {
@@ -185,7 +143,7 @@ export default {
          this.selectedNodeId = option.selectedNode.id;
       },
 
-      closed() {},
+      closed() { },
 
       clearAutomates() {
          this.data.objAutomate.items = [];
@@ -198,10 +156,10 @@ export default {
       },
 
       errorInFirstStep() {
-         this.errorInConfig = "This is an error!";
+         this.errorInConfig = "There is an error!";
       },
 
-      changeStep(step) {},
+      changeStep(step) { },
    },
    computed: {
       // attribute_attributeName() {
