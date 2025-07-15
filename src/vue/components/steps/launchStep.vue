@@ -196,7 +196,7 @@ export default {
 
 						if (this.isClassifyByLevel()) await this.linkToFloor(parentId);
 
-						this.percent = Math.floor((100 * (Listelength - tree.length)) / Listelength);
+						// this.percent = Math.floor((100 * (Listelength - tree.length)) / Listelength);
 					}
 				} catch (error) {
 					console.error(error);
@@ -213,38 +213,42 @@ export default {
 		},
 
 		isClassifyByLevel() {
-			const possibleAttributes = ["niveau", "level", "floor", "etage"];
-			return this.classify.class && possibleAttributes.includes(this.classify.by.toLowerCase());
+			return this.classify.class && this.classify.by && this.classify.by.trim().length > 0;
+			// const possibleAttributes = ["niveau", "level", "floor", "etage"];
+			// return this.classify.class && possibleAttributes.includes(this.classify.by.toLowerCase());
 		},
 
 		async linkToFloor(automateGroupId) {
 			if (this.floorsInGraph == null) this.floorsInGraph = await this.getFloorsInGraph();
-			const info = SpinalGraphService.getInfo(automateGroupId);
+			const automateGroupInfo = SpinalGraphService.getInfo(automateGroupId);
 
-			const floorFound = this.floorsInGraph[info.name.get()];
+			const floorFound = this.floorsInGraph[automateGroupInfo.name.get()];
 			if (floorFound) {
 				SpinalGraphService._addNode(floorFound);
-				const floorId = floorFound.id.get();
+				const floorId = floorFound.getId().get();
 
-				await SpinalGraphService.addChild(floorId, automateGroupId, "hasNetworkTree", SPINAL_RELATION_PTR_LST_TYPE);
+				await SpinalGraphService.addChild(floorId, automateGroupId, "hasNetworkTree", SPINAL_RELATION_PTR_LST_TYPE)
+					.catch((error) => {
+						console.error("Error linking automate group to floor:", error);
+					});
 			}
 		},
 
 
 		async getFloorsInGraph() {
 			const contexts = await SpinalGraphService.getContextWithType("geographicContext");
-			let context = contexts.find((el) => el.name.get().toLowerCase() === "spatial");
+			let context = contexts.find((el) => el.getName().get().toLowerCase() === "spatial");
 
 			if (!context) return {};
 
 			const building = (await context.getChildren("hasGeographicBuilding"))[0];
 			if (!building) return {};
 
-			const floors = await building.getChildren("hasGeographi cFloor");
+			const floors = await building.getChildren("hasGeographicFloor");
 			if (!floors || floors.length === 0) return {};
 
 			return floors.reduce((acc, floor) => {
-				const name = floor.name.get();
+				const name = floor.getName().get();
 				acc[name] = floor;
 				return acc;
 			}, {});

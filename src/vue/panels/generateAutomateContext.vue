@@ -100,12 +100,12 @@ export default {
          selectedNodeId: "",
          data: {
             objAutomate: {
-               attributeName: "CFA_Repère d'équipement",
+               attributeName: "BOS_ID",
                // attributeName: "CFA_Code équipement",
                items: [],
             },
             objEquipment: {
-               attributeName: "CFA_Repère d'équipement",
+               attributeName: "BOS_CONTROLE_PAR",
                // attributeName: "CFA_Code équipement",
                items: [],
             },
@@ -117,7 +117,7 @@ export default {
                callback: () => { },
             },
             namingConvention: {
-               attributeName: "CFA_Repère d'équipement",
+               attributeName: "BOS_ID",
                useAttrValue: true,
                personalized: {
                   callback: () => { },
