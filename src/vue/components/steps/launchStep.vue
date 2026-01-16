@@ -41,15 +41,20 @@ with this file. If not, see
 
 				<div class="content-item classifyContent">
 					<div class="checkbox">
-						<md-checkbox v-model="classify.class" class="md-primary">Classify controllers By</md-checkbox>
+						<md-checkbox v-model="classify.class" class="md-primary">
+							Classify controllers By Level
+						</md-checkbox>
 					</div>
 
+					<!-- 
 					<div class="input">
 						<md-field>
 							<label>Attribute name</label>
 							<md-input :disabled="!classify.class" v-model="classify.by"></md-input>
 						</md-field>
 					</div>
+					-->
+
 				</div>
 
 				<div class="content-item">
@@ -59,14 +64,11 @@ with this file. If not, see
 				</div>
 
 				<div class="content-item">
-					<md-button :disabled="error" class="md-raised md-primary" @click="launchGeneration">Launch
-						Generation</md-button>
+					<md-button :disabled="error" class="md-raised md-primary" @click="launchGeneration">
+						Launch Generation
+					</md-button>
 
-					<!--  
-               <md-button
-                  :disabled="error"
-                  class="md-raised md-primary"
-               >Edit Links</md-button>-->
+					<!-- <md-button :disabled="error" class="md-raised md-primary">Edit Links</md-button> -->
 				</div>
 			</div>
 		</div>
@@ -93,6 +95,7 @@ with this file. If not, see
 
 <script>
 import { SpinalGraph, SpinalGraphService, SPINAL_RELATION_PTR_LST_TYPE } from "spinal-env-viewer-graph-service";
+import { FLOOR_TYPE, GEOGRAPHIC_RELATIONS } from "spinal-env-viewer-context-geographic-service";
 // // import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 // import generateAutomateService from "../../../js/generateAutomateService";
 // import spinalNetworkTreeService from "../../../services/index";
@@ -140,7 +143,7 @@ export default {
 			dontCreateEmptyAutomate: true,
 			classify: {
 				class: true,
-				by: "Niveau",
+				by: "Level",
 			},
 		};
 	},
@@ -194,7 +197,9 @@ export default {
 						const parentId = await this.getOrCreateParentId(this.contextId, this.selectedNodeId, item);
 						await GenerateNetworkTreeService._createNodes(this.contextId, item, parentId);
 
-						if (this.isClassifyByLevel()) await this.linkToFloor(parentId);
+
+
+						// if (this.isClassifyByLevel()) await this.linkToFloor(parentId);
 
 						// this.percent = Math.floor((100 * (Listelength - tree.length)) / Listelength);
 					}
@@ -213,27 +218,26 @@ export default {
 		},
 
 		isClassifyByLevel() {
-			return this.classify.class && this.classify.by && this.classify.by.trim().length > 0;
-			// const possibleAttributes = ["niveau", "level", "floor", "etage"];
-			// return this.classify.class && possibleAttributes.includes(this.classify.by.toLowerCase());
+			// return this.classify.class && this.classify.by && this.classify.by.trim().length > 0;
+			const possibleAttributes = ["niveau", "level", "floor", "etage"];
+			return this.classify.class && this.classify.by && possibleAttributes.includes(this.classify.by.trim.toLowerCase());
 		},
 
-		async linkToFloor(automateGroupId) {
-			if (this.floorsInGraph == null) this.floorsInGraph = await this.getFloorsInGraph();
-			const automateGroupInfo = SpinalGraphService.getInfo(automateGroupId);
+		async linkNetworkNodeToFloor(automateGroupId, floorNodeId) {
+			// if (this.floorsInGraph == null) this.floorsInGraph = await this.getFloorsInGraph();
+			// const automateGroupInfo = SpinalGraphService.getInfo(automateGroupId);
 
-			const floorFound = this.floorsInGraph[automateGroupInfo.name.get()];
-			if (floorFound) {
-				SpinalGraphService._addNode(floorFound);
-				const floorId = floorFound.getId().get();
+			// const floorFound = this.floorsInGraph[automateGroupInfo.name.get()];
+			// if (floorFound) {
+			// SpinalGraphService._addNode(floorFound);
+			// const floorId = floorFound.getId().get();
 
-				await SpinalGraphService.addChild(floorId, automateGroupId, "hasNetworkTree", SPINAL_RELATION_PTR_LST_TYPE)
-					.catch((error) => {
-						console.error("Error linking automate group to floor:", error);
-					});
-			}
+			await SpinalGraphService.addChild(floorNodeId, automateGroupId, "hasNetworkTree", SPINAL_RELATION_PTR_LST_TYPE)
+				.catch((error) => {
+					console.error("Error linking automate group to floor:", error);
+				});
+			// }
 		},
-
 
 		async getFloorsInGraph() {
 			const contexts = await SpinalGraphService.getContextWithType("geographicContext");
@@ -254,34 +258,62 @@ export default {
 			}, {});
 		},
 
-		async getOrCreateParentId(contextId, nodeId, item) {
-			if (!this.classify.class) {
-				return nodeId;
+		async getOrCreateParentId(contextId, networkId, item) {
+
+			// if not classify, return the network node id
+			if (!this.classify.class) return networkId;
+
+
+
+			// if not classify by level, classify by attribute
+			if (!this.isClassifyByLevel()) {
+				const classifyBy = this.classify.by;
+				return this.getParentByAttributeName(item.model, item.dbId, contextId, networkId, classifyBy);
 			}
 
-			const val = this.classify.by;
+			// classify by level
+			const floorNode = await this.getFloorNode(item.model, item.dbId);
+			const parentName = floorNode ? floorNode.getName().get() : "Others";
+			const nodeId = await this.createOrGetNetworkName(contextId, networkId, parentName);
 
-			// const found = item.properties.find(
-			//    (el) => el.attributeName == val || el.displayName == val
-			// );
-			const found = await AttributesUtilities.findAttribute(item.model, item.dbId, val);
 
-			const parentName = found && found.displayValue ? found.displayValue : "Others";
+			if (floorNode) {
+				SpinalGraphService._addNode(floorNode);
+				await this.linkNetworkNodeToFloor(nodeId, floorNode.getId().get()); // link the network node to the floor
+			}
 
-			const children = await SpinalGraphService.getChildren(nodeId, [
-				// spinalNetworkTreeService.constants.NETWORK_RELATION,
-				CONSTANTS.NETWORK_RELATION,
-			]);
+			return nodeId;
+		},
 
-			const parentFound = children.find((el) => el.name.get() == parentName);
+
+		async getParentByAttributeName(model, dbId, contextId, networkId, attributeName) {
+			const attributeFound = await AttributesUtilities.findAttribute(model, dbId, attributeName);
+
+			const parentName = attributeFound && attributeFound.displayValue || "Others";
+
+			return this.createOrGetNetworkName(contextId, networkId, parentName);
+
+		},
+
+		async createOrGetNetworkName(contextId, networkId, parentName) {
+			const parentAlreadyExisting = await SpinalGraphService.getChildren(networkId, [CONSTANTS.NETWORK_RELATION]);
+			const parentFound = parentAlreadyExisting.find((el) => el.name.get() == parentName);
 
 			if (parentFound) return parentFound.id.get();
-
 
 			const parent = await NetworkTreeService.addNetwork(parentName, nodeId, contextId);
 
 			SpinalGraphService._addNode(parent);
 			return parent.getId().get();
+		},
+
+		async getFloorNode(bimObjectInfo) {
+			// GenerateNetworkTreeService._createBimObjectNode is private but we use it here to avoid code duplication.
+			// it creates or retrieve a BIM object node and returns it.
+			const bimObjectNodeId = await GenerateNetworkTreeService._createBimObjectNode(bimObjectInfo);
+
+			const realNode = SpinalGraphService.getRealNode(bimObjectNodeId);
+			return realNode.findOneParent(GEOGRAPHIC_RELATIONS, (node) => node.getType().get() === FLOOR_TYPE);
 		},
 
 		_displayResult(result) {
