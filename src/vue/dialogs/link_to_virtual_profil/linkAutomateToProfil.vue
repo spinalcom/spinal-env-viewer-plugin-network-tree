@@ -23,78 +23,50 @@ with this file. If not, see
 -->
 
 <template>
-  <md-dialog class="mdDialogContainer"
-             :md-active.sync="showDialog"
-             @md-closed="closeDialog(false)">
+  <md-dialog class="mdDialogContainer" :md-active.sync="showDialog" @md-closed="closeDialog(false)">
     <md-dialog-title class="dialogTitle">Link Automates to Profil
     </md-dialog-title>
     <md-dialog-content class="content">
-      <link-component v-if="pageSelected === PAGES.selection"
-                      :context_title="'Profils'"
-                      :category_title="'Categories'"
-                      :group_title="'Devices'"
-                      :data="data"
-                      :profils="profils"
-                      :devices="devices"
-                      :contextSelected="contextSelected"
-                      :profilSelected="profilSelected"
-                      :deviceSelected="deviceSelected"
-                      @selectContext="selectContext"
-                      @selectProfil="selectProfil"
-                      @selectDevice="selectDevice"></link-component>
 
-      <md-content class="results md-scrollbar"
-                  v-else-if="pageSelected === PAGES.result">
-        <result-component v-for="item in linkResult"
-                          class="result-component"
-                          :ref="`result-${item.automate.id}`"
-                          :key="item.automate.id"
-                          :results="item"
-                          @edit="editAutomateLinks">
+      <link-component v-if="pageSelected === PAGES.selection" :context_title="'Profils'" :category_title="'Categories'"
+        :group_title="'Devices'" :data="data" :profils="profils" :devices="devices" :contextSelected="contextSelected"
+        :profilSelected="profilSelected" :deviceSelected="deviceSelected" @selectContext="selectContext"
+        @selectProfil="selectProfil" @selectDevice="selectDevice"></link-component>
+
+      <md-content class="results md-scrollbar" v-else-if="pageSelected === PAGES.result">
+        <result-component v-for="item in linkResult" class="result-component" :ref="`result-${item.automate.id}`"
+          :key="item.automate.id" :results="item" @edit="editAutomateLinks">
         </result-component>
       </md-content>
 
-      <div class="state"
-           v-else-if="pageSelected === PAGES.loading">
+      <div class="state" v-else-if="pageSelected === PAGES.loading">
         <md-progress-spinner md-mode="indeterminate"></md-progress-spinner>
       </div>
 
-      <div class="state"
-           v-else-if="pageSelected === PAGES.success">
+      <div class="state" v-else-if="pageSelected === PAGES.success">
         <md-icon class="md-size-5x">done</md-icon>
       </div>
 
-      <div class="state"
-           v-else-if="pageSelected === PAGES.error">
+      <div class="state" v-else-if="pageSelected === PAGES.error">
         <md-icon class="md-size-5x">error_outline</md-icon>
       </div>
 
-      <div class="progress-bar"
-           v-else-if="pageSelected === PAGES.creation">
-        <div class="percent-number">{{percent}} %</div>
-        <md-progress-bar class="percent-bar"
-                         md-mode="buffer"
-                         :md-value="percent"></md-progress-bar>
+      <div class="progress-bar" v-else-if="pageSelected === PAGES.creation">
+        <div class="percent-number">{{ percent }} %</div>
+        <md-progress-bar class="percent-bar" md-mode="buffer" :md-value="percent"></md-progress-bar>
       </div>
 
     </md-dialog-content>
 
     <md-dialog-actions>
-      <md-button class="md-primary"
-                 @click="closeDialog(false)">Close</md-button>
+      <md-button class="md-primary" @click="closeDialog(false)">Close</md-button>
 
-      <md-button class="md-primary"
-                 :disabled="disabled()"
-                 v-if="pageSelected === PAGES.selection"
-                 @click="goToNext">Next</md-button>
+      <md-button class="md-primary" :disabled="disabled()" v-if="pageSelected === PAGES.selection"
+        @click="goToNext">Next</md-button>
 
-      <md-button class="md-primary"
-                 v-if="pageSelected === PAGES.result"
-                 @click="goToPreviousStep">Previous</md-button>
+      <md-button class="md-primary" v-if="pageSelected === PAGES.result" @click="goToPreviousStep">Previous</md-button>
 
-      <md-button class="md-primary"
-                 v-if="pageSelected === PAGES.result"
-                 @click="createLinks">Save</md-button>
+      <md-button class="md-primary" v-if="pageSelected === PAGES.result" @click="createLinks">Save</md-button>
 
     </md-dialog-actions>
   </md-dialog>
@@ -176,20 +148,19 @@ export default {
 
       this.callback = option.callback;
 
-      Promise.all([
-        this.getAllData(),
-        this.getAutomates(option.contextId, option.nodeId),
-      ]).then(([data, automates]) => {
-        this.physicalParams = {
-          contextId: option.contextId,
-          automates: automates.map((el) => el.get()),
-        };
+      return Promise.all([this.getAllData(), this.getAutomates(option.contextId, option.nodeId)])
+        .then(([data, automates]) => {
 
-        this.data = data;
-        this.updateProfils();
+          this.physicalParams = {
+            contextId: option.contextId,
+            automates: automates.map((el) => el.get()),
+          };
 
-        this.pageSelected = this.PAGES.selection;
-      });
+          this.data = data;
+          this.updateProfils();
+
+          this.pageSelected = this.PAGES.selection;
+        });
     },
 
     removed(option) {
@@ -362,6 +333,7 @@ export default {
       ).then((resultMap) => {
         this.resultMaps = resultMap;
         this.linkResult = Array.from(resultMap.values());
+        console.log(this.linkResult);
       });
     },
 
@@ -419,16 +391,16 @@ export default {
     updateProfils() {
       this.categories = [];
       if (this.contextSelected) {
-        let val = this.data.find((el) => el.id === this.contextSelected);
-        if (val) this.profils = val.profils;
+        let contextFound = this.data.find((el) => el.id === this.contextSelected);
+        if (contextFound) this.profils = contextFound.profils;
       }
     },
 
     updateDevices() {
       this.devices = [];
       if (this.profilSelected) {
-        let val = this.profils.find((el) => el.id === this.profilSelected);
-        if (val) this.devices = val.devices;
+        let profileFound = this.profils.find((el) => el.id === this.profilSelected);
+        if (profileFound) this.devices = profileFound.devices;
       }
     },
   },

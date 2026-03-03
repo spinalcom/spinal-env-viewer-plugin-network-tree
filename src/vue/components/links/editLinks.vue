@@ -23,28 +23,22 @@ with this file. If not, see
 -->
 
 <template>
-  <div class="link_container"
-       v-if="data">
+  <div class="link_container" v-if="data">
     <div class="links md-scrollbar">
       <div class="title">Items Linked</div>
       <div class="content">
-        <div class="linkedTemplate"
-             v-for="(item,index) of data.valids"
-             :key="index">
-          <div class="itemsLinked"
-               v-tooltip="item.automateItem.name">
-            <span>{{item.automateItem.name}}</span>
+        <div class="linkedTemplate" v-for="(item, index) of data.valids" :key="index">
+          <div class="itemsLinked" v-tooltip="item.automateItem.name">
+            <span>{{ item.automateItem.name }}</span>
           </div>
           <div class="unlinkButton">
             <md-button class="md-icon-button md-raised unlink"
-                       @click="unLinkItems(item.automateItem.id,item.profileItem.id)"
-                       v-tooltip="'unlink'">
+              @click="unLinkItems(item.automateItem.id, item.profileItem.id)" v-tooltip="'unlink'">
               <md-icon>link_off</md-icon>
             </md-button>
           </div>
-          <div class="itemsLinked"
-               v-tooltip="item.profileItem.name">
-            <span>{{item.profileItem.name}}</span>
+          <div class="itemsLinked" v-tooltip="item.profileItem.name">
+            <span>{{ item.profileItem.name }}</span>
           </div>
         </div>
       </div>
@@ -57,64 +51,49 @@ with this file. If not, see
  -->
     <div class="items">
       <div class="physical_automates">
-        <div class="title">{{leftTitle}}</div>
+        <div class="title">{{ leftTitle }}</div>
         <div class="lists">
-          <div class="list"
-               v-if="data.invalidAutomateItems.length > 0">
-            <div class="listItem"
-                 v-for="automateItem of data.invalidAutomateItems"
-                 :key="automateItem.id"
-                 v-tooltip="automateItem.name">
+          <div class="list" v-if="data.invalidAutomateItems.length > 0">
+            <div class="listItem" v-for="automateItem of data.invalidAutomateItems" :key="automateItem.id"
+              v-tooltip="automateItem.name">
               <!-- <md-checkbox class="md-primary"
                            v-model="automateItem.checked"
                            value="preview" />
               <span class="md-list-item-text">{{automateItem.name}}</span> -->
-              <md-radio class="md-primary"
-                        v-model="automateItemSelected"
-                        :value="automateItem.id">
-                {{automateItem.name}}
+              <md-radio class="md-primary" v-model="automateItemSelected" :value="automateItem.id">
+                {{ automateItem.name }}
               </md-radio>
             </div>
           </div>
 
-          <div v-else
-               class="allItemsLinked">
+          <div v-else class="allItemsLinked">
             All items are linked
           </div>
         </div>
       </div>
 
       <div class="linkButton">
-        <md-button class="md-icon-button md-raised md-primary"
-                   @click="linkItems()"
-                   :disabled="disableLink()">
+        <md-button class="md-icon-button md-raised md-primary" @click="linkItems()" :disabled="disableLink()">
           <md-icon>add_link</md-icon>
         </md-button>
       </div>
 
       <div class="virtual_automates">
-        <div class="title">{{rightTitle}}</div>
+        <div class="title">{{ rightTitle }}</div>
         <div class="lists">
-          <div class="list"
-               v-if="data.invalidProfileItems.length > 0">
-            <div class="listItem"
-                 v-for="profileItem of data.invalidProfileItems"
-                 :key="profileItem.id"
-                 v-tooltip="profileItem.name">
-              <!-- <md-checkbox class="md-primary"
-                           v-model="profileItem.checked"
-                           value="preview" />
-              <span class="md-list-item-text">{{profileItem.name}}</span> -->
-              <md-radio class="md-primary"
-                        v-model="profileItemSelected"
-                        :value="profileItem.id">
-                {{profileItem.name}}
+          <div class="list" v-if="data.invalidProfileItems.length > 0">
+            <div class="listItem" v-for="profileItem of data.invalidProfileItems" :key="profileItem.id"
+              v-tooltip="profileItem.name">
+              <!-- <md-checkbox class="md-primary" :value="ItemIsCheked(profileItem)" @click="checkItem(profileItem)" />
+              <span class="md-list-item-text">{{ profileItem.name }}</span> -->
+
+              <md-radio class="md-primary" v-model="profileItemSelected" :value="profileItem.id">
+                {{ profileItem.name }}
               </md-radio>
             </div>
           </div>
 
-          <div v-else
-               class="allItemsLinked">
+          <div v-else class="allItemsLinked">
             All items are linked
           </div>
         </div>
@@ -123,8 +102,7 @@ with this file. If not, see
     </div>
   </div>
 
-  <div class="loading"
-       v-else>
+  <div class="loading" v-else>
     loading...
   </div>
 </template>
@@ -143,6 +121,7 @@ export default {
     return {
       automateItemSelected: undefined,
       profileItemSelected: undefined,
+      // profileItemSelected : []
     };
   },
   methods: {
@@ -187,10 +166,23 @@ export default {
       return (
         typeof this.automateItemSelected === "undefined" ||
         typeof this.profileItemSelected === "undefined"
+        // profileItemSelected.length === 0
       );
     },
+
+    // ItemIsCheked(profileItem) {
+    //   return this.profileItemSelected.some((item) => item.id === profileItem.id);
+    // },
+
+    // checkItem(profileItem) {
+    //   if (this.ItemIsCheked(profileItem)) {
+    //     this.profileItemSelected = this.profileItemSelected.filter(item => item.id !== profileItem.id);
+    //     return;
+    //   }
+    //   this.profileItemSelected.push(profileItem);
+    // }
   },
-};
+}
 </script>
 
 <style scoped>
