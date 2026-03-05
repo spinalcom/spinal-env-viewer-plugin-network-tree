@@ -33,7 +33,8 @@ class ClearAutomateContent extends SpinalContextApp {
       return Promise.resolve(-1);
    }
 
-   action(option) {
+   async action(option) {
+
       // spinalPanelManagerService.openPanel("generateAutomateContextPanel", {
       //    context: option.context.get(),
       //    selectedNode: option.selectedNode.get()
@@ -41,31 +42,55 @@ class ClearAutomateContent extends SpinalContextApp {
       const contextId = option.context.id.get();
       const nodeId = option.selectedNode.id.get();
 
-      removeRelation(contextId, nodeId);
+
+
+      const node = SpinalGraphService.getRealNode(nodeId);
+      const context = SpinalGraphService.getRealNode(contextId);
+
+      const found = [node];
+
+      while (found.length > 0) {
+         const currentNode = found.shift();
+         const children = await currentNode.getChildrenInContext(context);
+         await removeRelation(currentNode, children);
+         // const children = await currentNode.getChildrenInContext(context);
+         found.push(...children);
+      }
+
+
+      console.log("network tree content cleared");
 
    }
 
 }
 
-const removeRelation = async (contextId, nodeId) => {
-   const realNode = SpinalGraphService.getRealNode(nodeId);
-   // if (realNode.hasRelation(spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
-   //    const children = await SpinalGraphService.getChildrenInContext(nodeId, contextId);
-   //    await realNode.removeRelation(spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
-   //    return children.map(el => {
-   //       return removeRelation(contextId, el.id.get());
-   //    })
-   // }
 
-   if (realNode.hasRelation(CONSTANTS.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
-      const children = await SpinalGraphService.getChildrenInContext(nodeId, contextId);
-      await realNode.removeRelation(CONSTANTS.NETWORK_BIMOJECT_RELATION, SPINAL_RELATION_PTR_LST_TYPE);
-      return children.map(el => {
-         return removeRelation(contextId, el.id.get());
-      })
-   }
+function removeRelation(parent, children) {
+   if (children.length === 0) return;
+   if (!Array.isArray(children)) children = [children];
 
+   const promises = children.map(child => {
+      const relation = [CONSTANTS.NETWORK_BIMOJECT_RELATION, CONSTANTS.NETWORK_RELATION].find(el => parent.hasRelation(el, SPINAL_RELATION_PTR_LST_TYPE));
+      if (relation) {
+         return parent.removeChild(child, relation, SPINAL_RELATION_PTR_LST_TYPE);
+      }
+   })
+
+   return Promise.all(promises);
 }
+
+
+// const removeRelation = async (contextId, nodeId) => {
+//    const realNode = SpinalGraphService.getRealNode(nodeId);
+//    const relation = [CONSTANTS.NETWORK_BIMOJECT_RELATION, CONSTANTS.NETWORK_RELATION].find(el => realNode.hasRelation(el, SPINAL_RELATION_PTR_LST_TYPE));
+
+//    if (relation) {
+//       const children = await SpinalGraphService.getChildrenInContext(nodeId, contextId);
+//       await realNode.removeRelation(relation, SPINAL_RELATION_PTR_LST_TYPE);
+//       return children.map(el => { return removeRelation(contextId, el.id.get()) })
+//    }
+
+// }
 
 const clearAutomateContent = new ClearAutomateContent();
 
