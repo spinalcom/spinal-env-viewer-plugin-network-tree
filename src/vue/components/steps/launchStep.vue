@@ -220,7 +220,7 @@ export default {
 		isClassifyByLevel() {
 			// return this.classify.class && this.classify.by && this.classify.by.trim().length > 0;
 			const possibleAttributes = ["niveau", "level", "floor", "etage"];
-			return this.classify.class && this.classify.by && possibleAttributes.includes(this.classify.by.trim.toLowerCase());
+			return this.classify.class && this.classify.by && possibleAttributes.includes(this.classify.by.trim().toLowerCase());
 		},
 
 		async linkNetworkNodeToFloor(automateGroupId, floorNodeId) {
