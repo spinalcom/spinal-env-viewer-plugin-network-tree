@@ -100,12 +100,7 @@ import { FLOOR_TYPE, GEOGRAPHIC_RELATIONS } from "spinal-env-viewer-context-geog
 // import generateAutomateService from "../../../js/generateAutomateService";
 // import spinalNetworkTreeService from "../../../services/index";
 
-import {
-	NetworkTreeService,
-	GenerateNetworkTreeService,
-	AttributesUtilities,
-	CONSTANTS,
-} from "spinal-env-viewer-plugin-network-tree-service";
+import { NetworkTreeService, GenerateNetworkTreeService, AttributesUtilities, CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 
 export default {
 	name: "launchGeneration",
@@ -152,25 +147,16 @@ export default {
 			this.appState = this.STATES.loading;
 			this.formatData().then(
 				({ automatesProperties, equipementsProperties }) => {
-					return GenerateNetworkTreeService.createTree(
-						automatesProperties,
-						equipementsProperties,
-						this.attribute
-					).then(({ tree, invalids, valids }) => {
-						this.tree = tree;
-						this.validItems = valids;
-						this.invalidItems = invalids;
+					return GenerateNetworkTreeService.createTree(automatesProperties, equipementsProperties, this.attribute)
+						.then(({ tree, invalids, valids }) => {
+							this.tree = tree;
+							this.validItems = valids;
+							this.invalidItems = invalids;
 
-						this.verified = true;
-						this.appState = this.STATES.normal;
-						this.$emit("verified");
-					});
-
-					// this.automatesVerificationResult = result.automatesProperties;
-					// this.equipementsVerificationResult = result.equipementsProperties;
-					//    this.verified = true;
-					//    this.appState = this.STATES.normal;
-					//    this.$emit("verified");
+							this.verified = true;
+							this.appState = this.STATES.normal;
+							this.$emit("verified");
+						});
 				}
 			);
 		},
@@ -179,9 +165,7 @@ export default {
 			this.appState = this.STATES.creation;
 			let tree = [...this.tree];
 
-			// if (this.dontCreateEmptyAutomate) {
-			// 	tree = this.tree.filter((el) => el.children.length > 0);
-			// }
+			console.log(tree);
 
 			const Listelength = tree.length;
 			let isError = false;
@@ -189,6 +173,7 @@ export default {
 			while (!isError && tree.length > 0) {
 				const item = tree.shift();
 
+				console.log(item);
 				// skip if the item is empty and dontCreateEmptyAutomate is true
 				if (this.dontCreateEmptyAutomate && item.children.length === 0) continue;
 
@@ -197,13 +182,9 @@ export default {
 						const parentId = await this.getOrCreateParentId(this.contextId, this.selectedNodeId, item);
 						await GenerateNetworkTreeService._createNodes(this.contextId, item, parentId);
 
-
-
-						// if (this.isClassifyByLevel()) await this.linkToFloor(parentId);
-
-						// this.percent = Math.floor((100 * (Listelength - tree.length)) / Listelength);
 					}
 				} catch (error) {
+					console.error("Error creating network tree:", item);
 					console.error(error);
 					isError = true;
 				}
@@ -224,19 +205,10 @@ export default {
 		},
 
 		async linkNetworkNodeToFloor(automateGroupId, floorNodeId) {
-			// if (this.floorsInGraph == null) this.floorsInGraph = await this.getFloorsInGraph();
-			// const automateGroupInfo = SpinalGraphService.getInfo(automateGroupId);
-
-			// const floorFound = this.floorsInGraph[automateGroupInfo.name.get()];
-			// if (floorFound) {
-			// SpinalGraphService._addNode(floorFound);
-			// const floorId = floorFound.getId().get();
-
 			await SpinalGraphService.addChild(floorNodeId, automateGroupId, "hasNetworkTree", SPINAL_RELATION_PTR_LST_TYPE)
 				.catch((error) => {
 					console.error("Error linking automate group to floor:", error);
 				});
-			// }
 		},
 
 		async getFloorsInGraph() {
@@ -272,7 +244,7 @@ export default {
 			}
 
 			// classify by level
-			const floorNode = await this.getFloorNode(item.model, item.dbId);
+			const floorNode = await this.getFloorNode(item);
 			const parentName = floorNode ? floorNode.getName().get() : "Others";
 			const nodeId = await this.createOrGetNetworkName(contextId, networkId, parentName);
 
@@ -301,16 +273,17 @@ export default {
 
 			if (parentFound) return parentFound.id.get();
 
-			const parent = await NetworkTreeService.addNetwork(parentName, nodeId, contextId);
+			const parent = await NetworkTreeService.addNetwork(parentName, networkId, contextId);
 
 			SpinalGraphService._addNode(parent);
 			return parent.getId().get();
 		},
 
-		async getFloorNode(bimObjectInfo) {
+		async getFloorNode(item) {
 			// GenerateNetworkTreeService._createBimObjectNode is private but we use it here to avoid code duplication.
 			// it creates or retrieve a BIM object node and returns it.
-			const bimObjectNodeId = await GenerateNetworkTreeService._createBimObjectNode(bimObjectInfo);
+
+			const bimObjectNodeId = await GenerateNetworkTreeService._createBimObjectNode(item);
 
 			const realNode = SpinalGraphService.getRealNode(bimObjectNodeId);
 			return realNode.findOneParent(GEOGRAPHIC_RELATIONS, (node) => node.getType().get() === FLOOR_TYPE);
@@ -325,16 +298,8 @@ export default {
 
 		formatData() {
 			const promises = [
-				GenerateNetworkTreeService.getElementProperties(
-					this.automatesObj.items,
-					this.automatesObj.attributeName,
-					this.namingConvention
-				),
-				GenerateNetworkTreeService.getElementProperties(
-					this.equipmentsObj.items,
-					this.equipmentsObj.attributeName,
-					this.namingConvention
-				),
+				GenerateNetworkTreeService.getElementProperties(this.automatesObj.items, this.automatesObj.attributeName, this.namingConvention),
+				GenerateNetworkTreeService.getElementProperties(this.equipmentsObj.items, this.equipmentsObj.attributeName, this.namingConvention),
 			];
 
 			return Promise.all(promises).then((result) => {

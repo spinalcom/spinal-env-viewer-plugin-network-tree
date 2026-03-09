@@ -1,4 +1,4 @@
-console.log("spinal-env-viewer-plugin-network-tree loaded");
+console.log("spinal-env-viewer-plugin-network-tree loaded 2");
 import "./buttons";
 import "./vue/dialogs";
 import "./vue/panels";
