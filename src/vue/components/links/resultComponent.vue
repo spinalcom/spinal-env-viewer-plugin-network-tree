@@ -46,7 +46,7 @@ with this file. If not, see
 
 <script>
 import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
-import { EDIT_AUTOMATE_LINK_DIALOG } from "../../js/constants";
+import { EDIT_AUTOMATE_LINK_DIALOG } from "../../../js/constants";
 // import Vue from "vue";
 // Vue.forceUpdate();
 

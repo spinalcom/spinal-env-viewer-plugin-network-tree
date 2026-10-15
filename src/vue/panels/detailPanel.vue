@@ -60,7 +60,7 @@ with this file. If not, see
 const {
    spinalPanelManagerService,
 } = require("spinal-env-viewer-panel-manager-service");
-const { NETWORK_TREE_DETAIL_PANEL } = require("../../../js/constants");
+const { NETWORK_TREE_DETAIL_PANEL } = require("../../js/constants");
 
 // import spinalNetworktree from "../../services";
 
