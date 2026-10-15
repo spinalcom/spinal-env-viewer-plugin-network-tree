@@ -24,28 +24,19 @@ with this file. If not, see
 
 <template>
 
-   <md-dialog
-      :md-active.sync="showDialog"
-      @md-closed="closeDialog(false)"
-   >
-      <md-dialog-title>{{title}}</md-dialog-title>
+   <md-dialog :md-active.sync="showDialog" @md-closed="closeDialog(false)">
+      <md-dialog-title>{{ title }}</md-dialog-title>
       <md-dialog-content>
          <md-field>
-            <label>{{label}}</label>
+            <label>{{ label }}</label>
             <md-input v-model="inputValue"></md-input>
          </md-field>
 
       </md-dialog-content>
       <md-dialog-actions>
-         <md-button
-            class="md-primary"
-            @click="closeDialog(false)"
-         >Close</md-button>
-         <md-button
-            class="md-primary"
-            @click="closeDialog(true)"
-            :disabled="!(inputValue.trim().length > 0)"
-         >Save</md-button>
+         <md-button class="md-primary" @click="closeDialog(false)">Close</md-button>
+         <md-button class="md-primary" @click="closeDialog(true)"
+            :disabled="!(inputValue.trim().length > 0)">Save</md-button>
       </md-dialog-actions>
    </md-dialog>
 </template>
@@ -56,7 +47,7 @@ with this file. If not, see
 import { NetworkTreeService } from "spinal-env-viewer-plugin-network-tree-service";
 
 export default {
-   name: "createNetworkDialog",
+   name: "createNetworkDialogComponent",
    props: ["onFinised"],
    data() {
       return {

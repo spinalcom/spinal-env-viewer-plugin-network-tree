@@ -9,6 +9,7 @@ import {
 } from "spinal-env-viewer-graph-service";
 
 import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+import { CONFIRM_UNLIK_PROFIL_DIALOG } from "../../js/constants";
 
 import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
@@ -65,7 +66,7 @@ class UnLinkAutomateToProfil extends SpinalContextApp {
     let contextId = option.context.id.get();
     let nodeId = option.selectedNode.id.get();
 
-    spinalPanelManagerService.openPanel("confirmUnlikProfilDialog", {
+    spinalPanelManagerService.openPanel(CONFIRM_UNLIK_PROFIL_DIALOG, {
       contextId,
       nodeId,
     });

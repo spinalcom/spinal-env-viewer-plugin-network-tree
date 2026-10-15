@@ -1,8 +1,9 @@
 import Vue from "vue";
 
-import {
-  SpinalForgeExtention,
-} from "spinal-env-viewer-panel-manager-service_spinalforgeextention";
+import { SpinalForgeExtention } from "spinal-env-viewer-panel-manager-service_spinalforgeextention";
+
+
+import { GENERATE_AUTOMATE_CONTEXT_PANEL, NETWORK_TREE_DETAIL_PANEL } from "../../js/constants";
 
 
 import GenerateAutomateContext from "./generateAutomateContext.vue";
@@ -11,7 +12,7 @@ import detailPanel from "./detailPanel.vue";
 
 const panels = [
   {
-    name: "generateAutomateContextPanel",
+    name: GENERATE_AUTOMATE_CONTEXT_PANEL,
     vueMountComponent: Vue.extend(GenerateAutomateContext),
     panel: {
       title: "Generate Automate",
@@ -23,7 +24,7 @@ const panels = [
     },
   },
   {
-    name: "networkTreeDetailPanel",
+    name: NETWORK_TREE_DETAIL_PANEL,
     vueMountComponent: Vue.extend(detailPanel),
     panel: {
       title: "Network tree detail panel",

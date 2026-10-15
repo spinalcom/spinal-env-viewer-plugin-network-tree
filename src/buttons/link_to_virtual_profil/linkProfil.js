@@ -4,6 +4,7 @@ import {
 } from "spinal-env-viewer-context-menu-service";
 
 import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+import { LINK_AUTOMATE_TO_PROFIL_DIALOG } from "../../js/constants";
 
 import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
 import {
@@ -48,7 +49,7 @@ class LinkAutomateToProfil extends SpinalContextApp {
     let contextId = option.context.id.get();
     let nodeId = option.selectedNode.id.get();
 
-    spinalPanelManagerService.openPanel("linkAutomateToProfilDialog", {
+    spinalPanelManagerService.openPanel(LINK_AUTOMATE_TO_PROFIL_DIALOG, {
       contextId,
       nodeId,
     });

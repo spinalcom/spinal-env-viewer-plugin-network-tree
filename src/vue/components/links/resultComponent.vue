@@ -24,25 +24,21 @@ with this file. If not, see
 
 <template>
   <div class="result_container">
-    <div class="title"
-         v-tooltip="results.automate.name">{{results.automate.name}}</div>
+    <div class="title" v-tooltip="results.automate.name">{{ results.automate.name }}</div>
     <div class="content">
 
-      <div class="valids textDiv"
-           v-tooltip="`${results.valids.length} Items linked`">
-        <div class="value">{{results.valids.length}}</div>
+      <div class="valids textDiv" v-tooltip="`${results.valids.length} Items linked`">
+        <div class="value">{{ results.valids.length }}</div>
         <div class="name">Items linked</div>
       </div>
 
-      <div class="invalids textDiv"
-           v-tooltip="`${results.invalidAutomateItems.length} Items not linked`">
-        <div class="value">{{results.invalidAutomateItems.length}}</div>
+      <div class="invalids textDiv" v-tooltip="`${results.invalidAutomateItems.length} Items not linked`">
+        <div class="value">{{ results.invalidAutomateItems.length }}</div>
         <div class="name">Items not linked</div>
       </div>
 
       <div class="button">
-        <md-button class="md-raised md-primary"
-                   @click="editLink">Edit</md-button>
+        <md-button class="md-raised md-primary" @click="editLink">Edit</md-button>
       </div>
     </div>
   </div>
@@ -50,6 +46,7 @@ with this file. If not, see
 
 <script>
 import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+import { EDIT_AUTOMATE_LINK_DIALOG } from "../../js/constants";
 // import Vue from "vue";
 // Vue.forceUpdate();
 
@@ -66,7 +63,7 @@ export default {
   },
   methods: {
     editLink() {
-      spinalPanelManagerService.openPanel("editAutomateLinkDialog", {
+      spinalPanelManagerService.openPanel(EDIT_AUTOMATE_LINK_DIALOG, {
         data: this.results,
         nodeId: this.results.automate.id,
         callback: (dataEdited) => {

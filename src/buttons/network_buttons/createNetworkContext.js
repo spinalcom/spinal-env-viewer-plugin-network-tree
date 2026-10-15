@@ -2,6 +2,7 @@ import {
   SpinalContextApp,
   spinalContextMenuService
 } from "spinal-env-viewer-context-menu-service";
+import { CREATE_NETWORK_DIALOG } from "../../js/constants";
 
 const {
   spinalPanelManagerService,
@@ -32,7 +33,7 @@ class CreateNetWorkContext extends SpinalContextApp {
       createContext: true
     };
 
-    spinalPanelManagerService.openPanel('createNetworkDialog', dialogParams);
+    spinalPanelManagerService.openPanel(CREATE_NETWORK_DIALOG, dialogParams);
   }
 
 }

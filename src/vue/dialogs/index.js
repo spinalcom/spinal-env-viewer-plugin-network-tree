@@ -1,5 +1,15 @@
 import Vue from "vue";
 const { SpinalMountExtention } = require("spinal-env-viewer-panel-manager-service");
+import {
+    CREATE_NETWORK_DIALOG,
+    LINK_AUTOMATE_TO_PROFIL_DIALOG,
+    CONFIRM_UNLIK_PROFIL_DIALOG,
+    EDIT_AUTOMATE_LINK_DIALOG,
+    PERSONALIZED_ATTRIBUTE_DIALOG,
+    PERSONALIZE_NAMING_CONVENTION,
+    LINK_TO_GTB_DIALOG,
+    EDIT_LINK_TO_GTB_DEVICE
+} from "../../js/constants";
 
 
 
@@ -14,45 +24,46 @@ import PersonalizeNamingConvention from "./network_dialogs/personalizeNamingConv
 import LinkToGtbDialog from "./link_to_gtb/linkToGtbDialog.vue";
 import EditLinkToGTBDevice from "./link_to_gtb/confirmLinkToGTB.vue"
 
-const dialogs = [{
-    name: "createNetworkDialog",
-    vueMountComponent: Vue.extend(dialogComponent),
-    parentContainer: document.body
-},
-{
-    name: "linkAutomateToProfilDialog",
-    vueMountComponent: Vue.extend(linkAutomateToProfil),
-    parentContainer: document.body
-},
-{
-    name: "confirmUnlikProfilDialog",
-    vueMountComponent: Vue.extend(confirmUnlikProfilDialog),
-    parentContainer: document.body
-}, {
-    name: "editAutomateLinkDialog",
-    vueMountComponent: Vue.extend(editAutomateLinkDialog),
-    parentContainer: document.body
-},
-{
-    name: "personalizedAttributeDialog",
-    vueMountComponent: Vue.extend(PersonalizedAttributeDialog),
-    parentContainer: document.body
-},
-{
-    name: "personalizeNamingConvention",
-    vueMountComponent: Vue.extend(PersonalizeNamingConvention),
-    parentContainer: document.body
-},
-{
-    name: "linkToGtbDialog",
-    vueMountComponent: Vue.extend(LinkToGtbDialog),
-    parentContainer: document.body
-},
-{
-    name: "editLinkToGTBDevice",
-    vueMountComponent: Vue.extend(EditLinkToGTBDevice),
-    parentContainer: document.body
-}
+const dialogs = [
+    {
+        name: CREATE_NETWORK_DIALOG,
+        vueMountComponent: Vue.extend(dialogComponent),
+        parentContainer: document.body
+    },
+    {
+        name: LINK_AUTOMATE_TO_PROFIL_DIALOG,
+        vueMountComponent: Vue.extend(linkAutomateToProfil),
+        parentContainer: document.body
+    },
+    {
+        name: CONFIRM_UNLIK_PROFIL_DIALOG,
+        vueMountComponent: Vue.extend(confirmUnlikProfilDialog),
+        parentContainer: document.body
+    }, {
+        name: EDIT_AUTOMATE_LINK_DIALOG,
+        vueMountComponent: Vue.extend(editAutomateLinkDialog),
+        parentContainer: document.body
+    },
+    {
+        name: PERSONALIZED_ATTRIBUTE_DIALOG,
+        vueMountComponent: Vue.extend(PersonalizedAttributeDialog),
+        parentContainer: document.body
+    },
+    {
+        name: PERSONALIZE_NAMING_CONVENTION,
+        vueMountComponent: Vue.extend(PersonalizeNamingConvention),
+        parentContainer: document.body
+    },
+    {
+        name: LINK_TO_GTB_DIALOG,
+        vueMountComponent: Vue.extend(LinkToGtbDialog),
+        parentContainer: document.body
+    },
+    {
+        name: EDIT_LINK_TO_GTB_DEVICE,
+        vueMountComponent: Vue.extend(EditLinkToGTBDevice),
+        parentContainer: document.body
+    }
 ]
 
 

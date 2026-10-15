@@ -6,6 +6,7 @@ import {
 import {
   spinalPanelManagerService
 } from "spinal-env-viewer-panel-manager-service";
+import { NETWORK_TREE_DETAIL_PANEL } from "../../../js/constants";
 
 // import networkTreeService from "../../services";
 import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
@@ -34,7 +35,7 @@ class TableDetail extends SpinalContextApp {
   }
 
   action(option) {
-    spinalPanelManagerService.openPanel("networkTreeDetailPanel", option.selectedNode.get());
+    spinalPanelManagerService.openPanel(NETWORK_TREE_DETAIL_PANEL, option.selectedNode.get());
   }
 
 }

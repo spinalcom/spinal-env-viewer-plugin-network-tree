@@ -23,42 +23,31 @@ with this file. If not, see
 -->
 
 <template>
-  <md-dialog class="mdDialogContainer"
-             :md-active.sync="showDialog"
-             @md-closed="closeDialog(false)">
+  <md-dialog class="mdDialogContainer" :md-active.sync="showDialog" @md-closed="closeDialog(false)">
     <md-dialog-title style="text-align : center">Unlink Profil</md-dialog-title>
     <md-dialog-content>
       <div class="content">
-        <div class="normal"
-             v-if="state == STATES.normal">
+        <div class="normal" v-if="state == STATES.normal">
           <div>
             <!-- style="text-align : center" -->
             Do you want to delete the profil link ?
           </div>
           <div>
-            <md-checkbox v-model="unLinkAlsoBmsDevice"
-                         class="md-primary">Remove Also bmsDevices</md-checkbox>
+            <md-checkbox v-model="unLinkAlsoBmsDevice" class="md-primary">Remove Also bmsDevices</md-checkbox>
           </div>
         </div>
-        <div class="state"
-             v-else>
-          <md-progress-spinner md-mode="indeterminate"
-                               v-if="state == STATES.loading">
+        <div class="state" v-else>
+          <md-progress-spinner md-mode="indeterminate" v-if="state == STATES.loading">
           </md-progress-spinner>
-          <md-icon class="md-size-5x"
-                   v-else-if="state == STATES.success">done</md-icon>
-          <md-icon class="md-size-5x"
-                   v-else-if="state == STATES.error">error</md-icon>
+          <md-icon class="md-size-5x" v-else-if="state == STATES.success">done</md-icon>
+          <md-icon class="md-size-5x" v-else-if="state == STATES.error">error</md-icon>
         </div>
       </div>
 
     </md-dialog-content>
     <md-dialog-actions>
-      <md-button class="md-primary"
-                 @click="closeDialog(false)">No</md-button>
-      <md-button class="md-primary"
-                 :disabled="state != STATES.normal"
-                 @click="removeLink">Yes</md-button>
+      <md-button class="md-primary" @click="closeDialog(false)">No</md-button>
+      <md-button class="md-primary" :disabled="state != STATES.normal" @click="removeLink">Yes</md-button>
     </md-dialog-actions>
   </md-dialog>
 </template>

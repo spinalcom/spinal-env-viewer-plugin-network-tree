@@ -6,6 +6,7 @@ import {
 import {
   spinalPanelManagerService
 } from "spinal-env-viewer-panel-manager-service";
+import { GENERATE_AUTOMATE_CONTEXT_PANEL } from "../../../js/constants";
 
 // import spinalNetworkTreeService from "../../services";
 import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
@@ -34,7 +35,7 @@ class GenerateAutomateContext extends SpinalContextApp {
   }
 
   action(option) {
-    spinalPanelManagerService.openPanel("generateAutomateContextPanel", {
+    spinalPanelManagerService.openPanel(GENERATE_AUTOMATE_CONTEXT_PANEL, {
       context: option.context.get(),
       selectedNode: option.selectedNode.get()
     });

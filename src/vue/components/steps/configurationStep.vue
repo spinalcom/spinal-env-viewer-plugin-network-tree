@@ -22,27 +22,14 @@ with this file. If not, see
 	<div class="_container">
 		<div class="content" v-if="isLoaded">
 			<md-list class="radios">
-				<md-list-item
-					v-for="(item, index) in radios"
-					:key="index"
-					v-tooltip="item.name"
-				>
-					<md-radio
-						class="md-primary"
-						v-model="attributeConfigSelected"
-						:value="item.id"
-						>{{ item.name }}</md-radio
-					>
+				<md-list-item v-for="(item, index) in radios" :key="index" v-tooltip="item.name">
+					<md-radio class="md-primary" v-model="attributeConfigSelected" :value="item.id">{{ item.name
+					}}</md-radio>
 				</md-list-item>
 
 				<md-list-item>
-					<md-radio
-						class="md-primary"
-						v-model="attributeConfigSelected"
-						:value="-1"
-						:disabled="true"
-						><a @click="personalized">Personalized</a></md-radio
-					>
+					<md-radio class="md-primary" v-model="attributeConfigSelected" :value="-1" :disabled="true"><a
+							@click="personalized">Personalized</a></md-radio>
 				</md-list-item>
 			</md-list>
 
@@ -75,87 +62,90 @@ with this file. If not, see
 </template>
 
 <script>
-	import { DEFAULT_VALUES } from "../../../js/attributeConfig";
-	import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
-	export default {
-		name: "configuration",
-		props: {
-			// data: {},
-			// automateObj: {},
-			// equipmentObj: {},
-			attribute: {},
+import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+import { PERSONALIZED_ATTRIBUTE_DIALOG } from "../../../js/constants";
+// import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+export default {
+	name: "configuration",
+	props: {
+		// data: {},
+		// automateObj: {},
+		// equipmentObj: {},
+		attribute: {},
+	},
+	data() {
+		this.radios = DEFAULT_VALUES;
+		return {
+			attributeConfigSelected: "",
+			isLoaded: true,
+		};
+	},
+	methods: {
+		refresh() {
+			this.isLoaded = false;
+			setTimeout(() => {
+				this.isLoaded = true;
+			}, 300);
 		},
-		data() {
-			this.radios = DEFAULT_VALUES;
-			return {
-				attributeConfigSelected: "",
-				isLoaded: true,
-			};
+		// goToNext() {
+		//   this.$emit("next", { id: "first", index: "second" });
+		// }
+		personalized() {
+			spinalPanelManagerService.openPanel(PERSONALIZED_ATTRIBUTE_DIALOG, {
+				isPersonalized: this.attributeConfigSelected == -1,
+				attribute: this.attribute,
+				callback: (useRegex, res) => {
+					this.attributeConfigSelected = -1;
+					this.attribute.isRegex = useRegex;
+					if (useRegex) {
+						this.attribute.text = res.text;
+						this.attribute.flags = res.flags;
+						this.attribute.select = res.select;
+					} else {
+						this.attribute.text = "";
+						this.attribute.flags = [];
+						this.attribute.select = "";
+						this.attribute.callback = res.code;
+					}
+				},
+			});
 		},
-		methods: {
-			refresh() {
-				this.isLoaded = false;
-				setTimeout(() => {
-					this.isLoaded = true;
-				}, 300);
-			},
-			// goToNext() {
-			//   this.$emit("next", { id: "first", index: "second" });
-			// }
-			personalized() {
-				spinalPanelManagerService.openPanel("personalizedAttributeDialog", {
-					isPersonalized: this.attributeConfigSelected == -1,
-					attribute: this.attribute,
-					callback: (useRegex, res) => {
-						this.attributeConfigSelected = -1;
-						this.attribute.isRegex = useRegex;
-						if (useRegex) {
-							this.attribute.text = res.text;
-							this.attribute.flags = res.flags;
-							this.attribute.select = res.select;
-						} else {
-							this.attribute.text = "";
-							this.attribute.flags = [];
-							this.attribute.select = "";
-							this.attribute.callback = res.code;
-						}
-					},
-				});
-			},
-		},
-		watch: {
-			attributeConfigSelected() {
-				console.log(
-					"attributeConfigSelected",
-					this.attributeConfigSelected
+	},
+	watch: {
+		attributeConfigSelected() {
+			console.log(
+				"attributeConfigSelected",
+				this.attributeConfigSelected
+			);
+			if (this.attributeConfigSelected > -1) {
+				const found = this.radios.find(
+					(el) => el.id == this.attributeConfigSelected
 				);
-				if (this.attributeConfigSelected > -1) {
-					const found = this.radios.find(
-						(el) => el.id == this.attributeConfigSelected
-					);
-					this.attribute.isRegex = true;
-					this.attribute.text = found.value;
-					this.attribute.flags = found.flags || [];
-					this.attribute.select = found.select;
-				}
+				this.attribute.isRegex = true;
+				this.attribute.text = found.value;
+				this.attribute.flags = found.flags || [];
+				this.attribute.select = found.select;
+			}
 
-				this.$emit("changed");
-			},
+			this.$emit("changed");
 		},
-	};
+	},
+};
 </script>
 
 <style scoped>
-	._container {
-		width: 100%;
-		height: 100%;
-		padding: 0 0 0 0;
-	}
-	._container .content {
-		width: 100%;
-		height: 100%;
-	}
-	/* .container .buttons {
+._container {
+	width: 100%;
+	height: 100%;
+	padding: 0 0 0 0;
+}
+
+._container .content {
+	width: 100%;
+	height: 100%;
+}
+
+/* .container .buttons {
   width: 100%;
   height: 10%;
   display: flex;
@@ -165,24 +155,16 @@ with this file. If not, see
 </style>
 
 <style>
-	._container
-		.content
-		.radios
-		.md-list-item-content
-		> .md-checkbox:first-child,
-	._container .content .md-list-item-content > .md-radio:first-child {
-		width: 100%;
-		margin-right: 0px;
-	}
+._container .content .radios .md-list-item-content>.md-checkbox:first-child,
+._container .content .md-list-item-content>.md-radio:first-child {
+	width: 100%;
+	margin-right: 0px;
+}
 
-	._container
-		.content
-		.radios
-		.md-list-item-content
-		> .md-checkbox:first-child,
-	._container .content .md-list-item-content > .md-radio .md-radio-label {
-		width: calc(100% - 60px);
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
+._container .content .radios .md-list-item-content>.md-checkbox:first-child,
+._container .content .md-list-item-content>.md-radio .md-radio-label {
+	width: calc(100% - 60px);
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 </style>

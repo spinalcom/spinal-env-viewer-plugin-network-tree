@@ -7,20 +7,12 @@
          </md-field>
       </md-list-item>
       <md-list-item>
-         <md-radio
-            v-model="config.useAttrValue"
-            :value="true"
-            class="md-primary"
-         >Use attribute value</md-radio>
+         <md-radio v-model="config.useAttrValue" :value="true" class="md-primary">Use attribute value</md-radio>
       </md-list-item>
 
       <md-list-item>
-         <md-radio
-            v-model="config.useAttrValue"
-            disabled
-            :value="false"
-            class="md-primary"
-         ><a @click="personalized">Personalized</a></md-radio>
+         <md-radio v-model="config.useAttrValue" disabled :value="false" class="md-primary"><a
+               @click="personalized">Personalized</a></md-radio>
       </md-list-item>
 
    </md-list>
@@ -28,6 +20,7 @@
 </template>
 <script>
 import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+import { PERSONALIZE_NAMING_CONVENTION } from "../../../js/constants";
 
 export default {
    name: "namingConventionStep",
@@ -39,7 +32,7 @@ export default {
    },
    methods: {
       personalized() {
-         spinalPanelManagerService.openPanel("personalizeNamingConvention", {
+         spinalPanelManagerService.openPanel(PERSONALIZE_NAMING_CONVENTION, {
             config: this.config,
             callback: (argFunction) => {
                this.config.useAttrValue = false;
@@ -50,5 +43,4 @@ export default {
    },
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>

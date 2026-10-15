@@ -8,7 +8,7 @@ import { SpinalGraphService } from "spinal-env-viewer-graph-service";
 // import spinalNetworkTreeService from "../../services";
 
 import { LinkNetworkTreeService, CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
-
+import { EDIT_AUTOMATE_LINK_DIALOG } from "../../js/constants";
 import {
   spinalPanelManagerService
 } from "spinal-env-viewer-panel-manager-service";
@@ -59,7 +59,7 @@ class EditAutomateLink extends SpinalContextApp {
     // const data = await LinkNetworkTreeService.getDeviceAndProfilData(nodeId);
 
 
-    spinalPanelManagerService.openPanel("editAutomateLinkDialog", {
+    spinalPanelManagerService.openPanel(EDIT_AUTOMATE_LINK_DIALOG, {
       contextId,
       nodeId,
       // data,

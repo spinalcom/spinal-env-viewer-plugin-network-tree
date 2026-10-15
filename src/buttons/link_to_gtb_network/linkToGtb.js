@@ -4,6 +4,7 @@ import {
 } from "spinal-env-viewer-context-menu-service";
 
 import { spinalPanelManagerService } from "spinal-env-viewer-panel-manager-service";
+import { LINK_TO_GTB_DIALOG } from "../../../js/constants";
 import { BIM_OBJECT_TYPE } from "spinal-env-viewer-plugin-forge/dist/Constants";
 
 const SIDEBAR = "GraphManagerSideBar";
@@ -45,7 +46,7 @@ class LinkToGTBNetworkBtn extends SpinalContextApp {
     //     automates = await SpinalGraphService.getChildren(nodeId, [spinalNetworkTreeService.constants.NETWORK_BIMOJECT_RELATION])
     //   }
 
-    spinalPanelManagerService.openPanel("linkToGtbDialog", {
+    spinalPanelManagerService.openPanel(LINK_TO_GTB_DIALOG, {
       // automates
       nodeId,
       contextId,

@@ -35,7 +35,7 @@ class ClearAutomateContent extends SpinalContextApp {
 
    async action(option) {
 
-      // spinalPanelManagerService.openPanel("generateAutomateContextPanel", {
+      // spinalPanelManagerService.openPanel("networkTree_generateAutomateContextPanel", {
       //    context: option.context.get(),
       //    selectedNode: option.selectedNode.get()
       // });

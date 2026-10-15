@@ -1,32 +1,19 @@
 <template>
-   <md-dialog
-      :md-active.sync="showDialog"
-      @md-closed="closeDialog(false)"
-      class="personalizedDialog"
-   >
+   <md-dialog :md-active.sync="showDialog" @md-closed="closeDialog(false)" class="personalizedDialog">
       <md-dialog-title class="personalizedDialogTitle">Personnalize Naming convention</md-dialog-title>
 
       <md-dialog-content class="personalizedDialogContent">
          <div class="function _content">
 
-            <spinal-code-mirror
-               class="editorContainer"
-               :codeObj="functionValue"
-            ></spinal-code-mirror>
+            <spinal-code-mirror class="editorContainer" :codeObj="functionValue"></spinal-code-mirror>
 
          </div>
 
       </md-dialog-content>
 
       <md-dialog-actions>
-         <md-button
-            class="md-primary"
-            @click="closeDialog(false)"
-         >Close</md-button>
-         <md-button
-            class="md-primary"
-            @click="closeDialog(true)"
-         >Save</md-button>
+         <md-button class="md-primary" @click="closeDialog(false)">Close</md-button>
+         <md-button class="md-primary" @click="closeDialog(true)">Save</md-button>
       </md-dialog-actions>
    </md-dialog>
 </template>

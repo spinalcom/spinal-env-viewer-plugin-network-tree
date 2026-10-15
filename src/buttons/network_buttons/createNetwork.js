@@ -4,6 +4,7 @@ const { spinalPanelManagerService } = require("spinal-env-viewer-panel-manager-s
 
 // import networkService from "../../services"
 import { CONSTANTS } from "spinal-env-viewer-plugin-network-tree-service";
+import { CREATE_NETWORK_DIALOG } from "../../js/constants";
 
 const SIDEBAR = "GraphManagerSideBar";
 
@@ -35,7 +36,7 @@ class CreateNetWork extends SpinalContextApp {
       createContext: false
     };
 
-    spinalPanelManagerService.openPanel('createNetworkDialog', dialogParams);
+    spinalPanelManagerService.openPanel(CREATE_NETWORK_DIALOG, dialogParams);
   }
 
 }

@@ -26,58 +26,29 @@ with this file. If not, see
    <md-content class="myContainer md-scrollbar">
 
       <div class="header">
-         <md-button
-            class="md-primary exportBtn"
-            @click="exportFile"
-         >Export</md-button>
+         <md-button class="md-primary exportBtn" @click="exportFile">Export</md-button>
       </div>
 
-      <md-table
-         v-if="itemSelected"
-         v-model="data"
-         class="myTable md-scrollbar"
-      >
+      <md-table v-if="itemSelected" v-model="data" class="myTable md-scrollbar">
          <!-- <md-table-toolbar>
       <h1 class="md-title">Users</h1>
     </md-table-toolbar> -->
 
-         <md-table-empty-state
-            md-label="No element found"
-            md-description="No bim object found in this context"
-         >
+         <md-table-empty-state md-label="No element found" md-description="No bim object found in this context">
          </md-table-empty-state>
 
-         <md-table-row
-            slot="md-table-row"
-            slot-scope="{ item }"
-         >
+         <md-table-row slot="md-table-row" slot-scope="{ item }">
 
-            <md-table-cell
-               md-label="Id"
-               md-numeric
-               :title="item.externalId"
-               class="tableColumn"
-            >{{ item.externalId }}
+            <md-table-cell md-label="Id" md-numeric :title="item.externalId" class="tableColumn">{{ item.externalId }}
             </md-table-cell>
 
-            <md-table-cell
-               md-label="Name"
-               :title="item.name"
-               class="tableColumn"
-            >{{ item.name }}</md-table-cell>
+            <md-table-cell md-label="Name" :title="item.name" class="tableColumn">{{ item.name }}</md-table-cell>
 
-            <md-table-cell
-               md-label="Parent(s)"
-               :title="formatParents(item)"
-               class="tableColumn"
-            >{{ formatParents(item)}}
+            <md-table-cell md-label="Parent(s)" :title="formatParents(item)" class="tableColumn">{{
+               formatParents(item) }}
             </md-table-cell>
 
-            <md-table-cell
-               md-label="Group(s)"
-               :title="formatGroups(item)"
-               class="tableColumn"
-            >{{ formatGroups(item) }}
+            <md-table-cell md-label="Group(s)" :title="formatGroups(item)" class="tableColumn">{{ formatGroups(item) }}
             </md-table-cell>
 
          </md-table-row>
@@ -89,6 +60,7 @@ with this file. If not, see
 const {
    spinalPanelManagerService,
 } = require("spinal-env-viewer-panel-manager-service");
+const { NETWORK_TREE_DETAIL_PANEL } = require("../../../js/constants");
 
 // import spinalNetworktree from "../../services";
 
@@ -110,10 +82,10 @@ export default {
          this.itemSelected = params;
       },
 
-      closed() {},
+      closed() { },
 
       setTitle(title) {
-         spinalPanelManagerService.panels.networkTreeDetailPanel.panel.setTitle(
+         spinalPanelManagerService.panels[NETWORK_TREE_DETAIL_PANEL].panel.setTitle(
             title
          );
       },
